@@ -478,3 +478,19 @@
   border-width: 3px;
   color: var(--color-accent);
 }
+
+.cd-textarea {
+  height: auto;
+  min-height: 72px;
+  padding: var(--space-2) var(--space-3);
+  resize: vertical;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* ---------- Licence banner in the shell ---------- */
+.cd-shell-banner {
+  flex: none;
+  padding: var(--space-3) var(--space-8) 0;
+}

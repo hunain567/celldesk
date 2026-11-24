@@ -13,6 +13,8 @@
     "build": "pnpm --filter @nexodesk/desktop build",
     "dist:win": "pnpm --filter @nexodesk/desktop dist:win",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "lm:dev": "pnpm --filter @nexodesk/license-manager dev",
+    "lm:dist:win": "pnpm --filter @nexodesk/license-manager dist:win"
   }
 }

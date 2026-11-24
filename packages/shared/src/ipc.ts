@@ -7,6 +7,7 @@ import {
   BackupStatusSchema,
   BackupVerificationSchema,
 } from './backup';
+import { LicenseStatusSchema } from './license';
 
 /**
  * IPC contract shared by the renderer, the preload bridge and the main process.
@@ -114,6 +115,12 @@ export const ipcContract = {
     output: z.null(),
   },
   'restore:lastOutcome': { input: NoInput, output: RestoreOutcomeSchema },
+
+  'license:status': { input: NoInput, output: LicenseStatusSchema },
+  'license:requestCode': { input: NoInput, output: z.object({ code: z.string() }) },
+  'license:saveRequestFile': { input: NoInput, output: ChosenPathSchema },
+  'license:importFile': { input: NoInput, output: LicenseStatusSchema.nullable() },
+  'license:importCode': { input: z.object({ code: z.string().min(10).max(20000) }), output: LicenseStatusSchema },
 } as const;
 
 export type IpcContract = typeof ipcContract;
@@ -149,7 +156,8 @@ export type IpcResult<T> = { ok: true; data: T } | { ok: false; error: IpcError 
 /** Events pushed from the main process to the screen. */
 export type AppEvent =
   | { type: 'backup.started'; kind: string }
-  | { type: 'backup.finished'; kind: string; status: 'success' | 'partial' | 'failed'; error: string | null };
+  | { type: 'backup.finished'; kind: string; status: 'success' | 'partial' | 'failed'; error: string | null }
+  | { type: 'license.changed' };
 
 /** The API the preload bridge exposes on `window.nexodesk`. */
 export interface NexoDeskBridge {

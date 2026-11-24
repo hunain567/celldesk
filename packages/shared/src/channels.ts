@@ -22,6 +22,11 @@ export const IPC_CHANNEL_NAMES = [
   'restore:verify',
   'restore:start',
   'restore:lastOutcome',
+  'license:status',
+  'license:requestCode',
+  'license:saveRequestFile',
+  'license:importFile',
+  'license:importCode',
 ] as const;
 
 /** The single Electron IPC channel used for all request/response calls. */

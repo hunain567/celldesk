@@ -1,0 +1,36 @@
+appId: com.nexoerp.nexodesk.licensemanager
+productName: NexoDesk License Manager
+copyright: Copyright © 2026 NexoERP
+directories:
+  output: release/${version}
+  buildResources: build
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+asar: true
+asarUnpack:
+  - node_modules/better-sqlite3-multiple-ciphers/**
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+  grantFileProtocolExtraPrivileges: false
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  executableName: NexoDeskLicenseManager
+  artifactName: NexoDesk-License-Manager-Setup-${version}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: NexoDesk License Manager
+  deleteAppDataOnUninstall: false

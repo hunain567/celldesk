@@ -10,6 +10,8 @@ import { IpcRouter } from '../src/main/ipc/router';
 import { AuditLog } from '../src/main/services/audit';
 import { SettingsStore } from '../src/main/services/settings';
 import { PathGrants, registerBackupHandlers } from '../src/main/ipc/backup-handlers';
+import { registerLicenseHandlers } from '../src/main/ipc/license-handlers';
+import type { LicenseService } from '../src/main/licensing/service';
 import { createShop } from './backup-env';
 import { tempDir, TEST_KEY } from './helpers';
 
@@ -62,6 +64,12 @@ describe('IPC router', () => {
         runBackup: (kind) => shop.backups.run(kind),
         onRestorePrepared: () => undefined,
         lastRestoreOutcome: () => null,
+      });
+      registerLicenseHandlers(router, {
+        license: {} as LicenseService,
+        chooseRequestSavePath: async () => null,
+        chooseLicenseFile: async () => null,
+        onLicenseChanged: () => undefined,
       });
       expect(router.missingHandlers()).toEqual([]);
     } finally {

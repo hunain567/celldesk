@@ -9,10 +9,17 @@ import { bootstrapDatabase, resolveDataLocations, type BootstrapResult } from '.
 import { KeyFileMissingError, KeyFileUnreadableError } from './db/keystore';
 import { MigrationFailedError, SchemaTooNewError } from './db/migrator';
 import { PathGrants, registerBackupHandlers } from './ipc/backup-handlers';
+import { registerLicenseHandlers } from './ipc/license-handlers';
 import { registerHandlers } from './ipc/handlers';
 import { IpcRouter } from './ipc/router';
 import { logger } from './logger';
+import { ClockGuard, DatabaseTimeStore, RegistryTimeStore, SealedFileTimeStore } from './licensing/clock';
+import { loadDeviceIdentity } from './licensing/device';
+import { LicenseService } from './licensing/service';
+import { VENDOR_PUBLIC_KEY_PEM } from './licensing/vendor-key';
 import { createSecretProtector } from './platform/protector';
+import { REVOKED_LICENSE_IDS } from '@nexodesk/licensing';
+import { join } from 'node:path';
 import { AuditLog } from './services/audit';
 import { SettingsStore } from './services/settings';
 import { createMainWindow, hardenSession, isTrustedUrl, type WindowOptions } from './window';
@@ -27,6 +34,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 const SCHEDULER_INTERVAL_MS = 60 * 1000;
+/** How often the licence clock mark is moved forward while the app runs. */
+const CLOCK_TICK_MS = 10 * 60 * 1000;
 /** Missed scheduled backups are caught up shortly after start, not during start-up. */
 const SCHEDULER_FIRST_CHECK_MS = 2 * 60 * 1000;
 
@@ -38,6 +47,7 @@ const windowOptions: WindowOptions = {
 
 let database: BootstrapResult | null = null;
 let schedulerTimers: NodeJS.Timeout[] = [];
+let licenseService: LicenseService | null = null;
 
 function dataRoot(): string {
   // A separate folder can be used during development; packaged builds always use AppData.
@@ -82,15 +92,18 @@ function closeDatabase(): void {
   database = null;
 }
 
-function start(): void {
+async function start(): Promise<void> {
   const locations = resolveDataLocations(dataRoot());
   logger.init(locations.logDirectory);
   logger.info('NexoDesk starting', { version: app.getVersion(), packaged: app.isPackaged });
 
+  let protector: ReturnType<typeof createSecretProtector>;
+  let device: Awaited<ReturnType<typeof loadDeviceIdentity>>;
   try {
-    const protector = createSecretProtector({ allowUnprotected: !app.isPackaged });
+    protector = createSecretProtector({ allowUnprotected: !app.isPackaged });
     if (!protector.isOsBacked) logger.warn('OS key protection unavailable; development key stored unprotected');
     database = bootstrapDatabase({ locations, protector, appVersion: app.getVersion() });
+    device = await loadDeviceIdentity({ keyPath: join(locations.root, 'keys', 'device.key'), protector });
   } catch (error) {
     logger.error('Database start-up failed', error);
     dialog.showErrorBox('NexoDesk cannot start', `${startupErrorMessage(error)}\n\nData folder: ${locations.root}`);
@@ -158,6 +171,25 @@ function start(): void {
     log: (message, data) => logger.warn(message, data),
   });
 
+  const license = new LicenseService({
+    licenseDirectory: join(locations.root, 'license'),
+    vendorPublicKeyPem: VENDOR_PUBLIC_KEY_PEM,
+    device,
+    installId,
+    appVersion: app.getVersion(),
+    clock: new ClockGuard([
+      new DatabaseTimeStore(db),
+      new SealedFileTimeStore(join(locations.root, 'keys', 'session.dat'), protector),
+      new RegistryTimeStore(),
+    ]),
+    revokedLicenseIds: REVOKED_LICENSE_IDS,
+    audit,
+  });
+  licenseService = license;
+  license.tick();
+  const licenseStatus = license.status();
+  logger.info('Licence status', { state: licenseStatus.state, licenseId: licenseStatus.licenseId });
+
   const runBackup = async (kind: 'manual' | 'scheduled') => {
     sendEvent({ type: 'backup.started', kind });
     const result = await backups.run(kind);
@@ -210,6 +242,7 @@ function start(): void {
       // Let the IPC reply reach the screen, then replace the database and restart.
       setTimeout(() => {
         stopScheduler();
+        licenseService = null;
         closeDatabase();
         try {
           swapDatabase(journalPath(locations.restoreDirectory));
@@ -221,6 +254,29 @@ function start(): void {
       }, 500);
     },
     lastRestoreOutcome: () => lastRestoreOutcome,
+  });
+
+  registerLicenseHandlers(router, {
+    license,
+    chooseRequestSavePath: async (suggestedName) => {
+      const options = {
+        title: 'Save activation request',
+        defaultPath: join(app.getPath('desktop'), suggestedName),
+        filters: [{ name: 'NexoDesk activation request', extensions: ['ndreq'] }],
+      };
+      const result = mainWindow ? await dialog.showSaveDialog(mainWindow, options) : await dialog.showSaveDialog(options);
+      return result.canceled ? null : (result.filePath ?? null);
+    },
+    chooseLicenseFile: async () => {
+      const options = {
+        title: 'Choose a NexoDesk licence file',
+        properties: ['openFile'] as Array<'openFile'>,
+        filters: [{ name: 'NexoDesk licence', extensions: ['ndlic'] }],
+      };
+      const result = mainWindow ? await dialog.showOpenDialog(mainWindow, options) : await dialog.showOpenDialog(options);
+      return result.canceled ? null : (result.filePaths[0] ?? null);
+    },
+    onLicenseChanged: () => sendEvent({ type: 'license.changed' }),
   });
 
   const missing = router.missingHandlers();
@@ -253,6 +309,15 @@ function start(): void {
       .catch((error: unknown) => logger.error('Scheduled backup check failed', error));
   };
   schedulerTimers.push(
+    setInterval(() => {
+      try {
+        license.tick();
+      } catch (error) {
+        logger.error('Licence clock update failed', error);
+      }
+    }, CLOCK_TICK_MS),
+  );
+  schedulerTimers.push(
     setTimeout(() => {
       checkSchedule();
       schedulerTimers.push(setInterval(checkSchedule, SCHEDULER_INTERVAL_MS));
@@ -269,7 +334,7 @@ function start(): void {
   });
 }
 
-app.whenReady().then(start, (error: unknown) => {
+app.whenReady().then(start).catch((error: unknown) => {
   logger.error('Electron failed to initialise', error);
   app.exit(1);
 });
@@ -278,5 +343,11 @@ app.on('window-all-closed', () => app.quit());
 
 app.on('will-quit', () => {
   stopScheduler();
+  try {
+    licenseService?.tick();
+  } catch (error) {
+    logger.error('Licence clock update failed', error);
+  }
+  licenseService = null;
   closeDatabase();
 });

@@ -32,7 +32,7 @@ function contentSecurityPolicy(): Plugin {
 export default defineConfig({
   main: {
     build: {
-      externalizeDeps: { exclude: ['@nexodesk/shared', 'zod'] },
+      externalizeDeps: { exclude: ['@nexodesk/shared', '@nexodesk/licensing', 'zod'] },
       rollupOptions: { input: { index: resolve(__dirname, 'src/main/index.ts') } },
     },
   },

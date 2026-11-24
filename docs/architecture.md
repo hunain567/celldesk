@@ -77,11 +77,44 @@ scheduled run is retried after 30 minutes. Runs left `running` by a crash are ma
 Paths for backup locations and restore files are accepted from the screen only if the user picked them
 in a native dialog in the same session (`PathGrants`).
 
+## Licensing (`packages/licensing`, `apps/desktop/src/main/licensing`, `apps/license-manager`)
+
+No server. NexoERP issues signed, device-bound licence files from the private **License Manager** app.
+
+**Documents** (text, also saved as files): activation request `NDREQ1.…` (`.ndreq`) signed by the shop
+computer's device key; licence `NDLIC1.…` (`.ndlic`) signed by the NexoERP vendor key (Ed25519). The
+signed bytes are the base64url payload, so any edit breaks the signature.
+
+**Shop computer**
+- Device id = SHA-256 of Windows MachineGuid + motherboard serial (drive serial left out so an SSD swap
+  keeps the licence). Device key pair: Ed25519, private key sealed with DPAPI in `keys\device.key`.
+- A licence must match both the device id and the device public key. Copying files to another PC fails;
+  a reinstall that removed the device key needs a new file (License Manager keeps the same slot).
+- Vendor public key is compiled in (`src/main/licensing/vendor-key.ts`). `pnpm dist:win` refuses to build
+  while it is empty.
+- States: unlicensed, invalid, clock-problem, active, expiring (7 days), grace (licence `graceDays`),
+  expired (read-only), revoked (id in `packages/licensing/src/revoked.ts`). Backups and restore always work.
+- `LicenseService.assertCanWrite()` must be called by every service that creates business records.
+- Clock rollback: the newest time seen is kept in the encrypted database, a DPAPI-sealed file and the
+  registry (`HKCU\Software\NexoERP\NexoDesk`). A clock more than 10 minutes behind it, or behind the
+  licence issue time, is a clock problem (read-only) until corrected. A licence issued in the last 2 days
+  resets the mark, which clears a clock that was once set far ahead by mistake.
+
+**License Manager** (owner's laptop only)
+- Data in `%APPDATA%\NexoDesk License Manager\vault\`: SQLCipher database keyed by scrypt(master password)
+  and `vault.json` (salt). No password recovery. Vendor key pair generated on first run, stored inside.
+- Licences (monthly, 6 months, yearly, custom), device limit, grace days; activate from a request,
+  renewal files for registered computers, extend, suspend, revoke, remove computer, activation history.
+- Backup writes an encrypted copy plus `vault.json` to a chosen folder; reminder after 7 days.
+- Limits of offline licensing: suspension and device removal take effect when the current file expires;
+  revocation when the shop installs a release that lists the id.
+
 ## Milestones
 
 | Milestone | Status |
 | --- | --- |
 | M0 Foundation | Done: secure shell, encrypted DB, migrations, audit log, IPC contract, design tokens, System screen, installer config |
 | M1 Backup and Restore | Done: engine, schedule, retention, Restore Center, crash-safe swap, 36 backup/restore tests |
-| M2 Licensing | Next |
-| M3–M8 | Planned |
+| M2 Licensing | Done: signed device-bound licences, clock guard, Licence screen, License Manager app |
+| M3 Users and setup | Next |
+| M4–M8 | Planned |

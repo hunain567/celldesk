@@ -125,3 +125,12 @@ export function InfoIcon(props: SVGProps<SVGSVGElement>) {
     </Base>
   );
 }
+
+export function KeyIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="8" cy="15" r="4" />
+      <path d="m11 12 8.5-8.5M16 7l2.5 2.5M18.5 4.5 21 7" />
+    </Base>
+  );
+}

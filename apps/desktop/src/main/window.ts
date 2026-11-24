@@ -18,10 +18,13 @@ export function isTrustedUrl(url: string, options: WindowOptions): boolean {
   return options.devServerUrl ? new URL(url).origin === origin : url.startsWith(origin);
 }
 
-/** Locks down the default session: no permissions (camera, notifications, etc.) are ever granted. */
+/**
+ * Locks down the default session: no permissions (camera, notifications, etc.) are
+ * granted, except writing plain text to the clipboard for "Copy" buttons.
+ */
 export function hardenSession(): void {
   session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
-  session.defaultSession.setPermissionCheckHandler(() => false);
+  session.defaultSession.setPermissionCheckHandler((_contents, permission) => permission === 'clipboard-sanitized-write');
 }
 
 export function createMainWindow(options: WindowOptions): BrowserWindow {
