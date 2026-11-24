@@ -1,4 +1,12 @@
 import { z } from 'zod';
+import {
+  BackupHistoryEntrySchema,
+  BackupInspectionSchema,
+  BackupRunResultSchema,
+  BackupScheduleSchema,
+  BackupStatusSchema,
+  BackupVerificationSchema,
+} from './backup';
 
 /**
  * IPC contract shared by the renderer, the preload bridge and the main process.
@@ -50,6 +58,19 @@ export const IntegrityResultSchema = z.object({
 export type IntegrityResult = z.infer<typeof IntegrityResultSchema>;
 
 const NoInput = z.undefined();
+const ChosenPathSchema = z.object({ path: z.string().nullable() });
+const PathInput = z.object({ path: z.string().min(1).max(1024) });
+const RecoveryPasswordInput = z.string().max(256);
+
+export const RestoreOutcomeSchema = z
+  .object({
+    kind: z.enum(['completed', 'rolled-back']),
+    backupCreatedAt: z.string(),
+    reason: z.string().nullable(),
+    at: z.string(),
+  })
+  .nullable();
+export type RestoreOutcome = z.infer<typeof RestoreOutcomeSchema>;
 
 export const ipcContract = {
   'system:info': { input: NoInput, output: SystemInfoSchema },
@@ -63,6 +84,36 @@ export const ipcContract = {
     output: z.null(),
   },
   'audit:verify': { input: NoInput, output: AuditVerifyResultSchema },
+
+  'backup:status': { input: NoInput, output: BackupStatusSchema },
+  'backup:chooseFolder': { input: NoInput, output: ChosenPathSchema },
+  'backup:setup': {
+    input: z.object({ destinationPath: z.string().min(1).max(1024), recoveryPassword: RecoveryPasswordInput }),
+    output: z.null(),
+  },
+  'backup:addDestination': { input: PathInput, output: z.null() },
+  'backup:removeDestination': { input: z.object({ id: z.number().int().positive() }), output: z.null() },
+  'backup:setSchedule': { input: BackupScheduleSchema, output: z.null() },
+  'backup:runNow': { input: NoInput, output: BackupRunResultSchema },
+  'backup:history': {
+    input: z.object({ limit: z.number().int().min(1).max(500) }),
+    output: z.array(BackupHistoryEntrySchema),
+  },
+
+  'restore:chooseFile': { input: NoInput, output: ChosenPathSchema },
+  'restore:inspect': { input: PathInput, output: BackupInspectionSchema },
+  'restore:verify': {
+    input: PathInput.extend({ recoveryPassword: RecoveryPasswordInput.optional() }),
+    output: BackupVerificationSchema,
+  },
+  'restore:start': {
+    input: PathInput.extend({
+      recoveryPassword: RecoveryPasswordInput.optional(),
+      confirmation: z.literal('RESTORE'),
+    }),
+    output: z.null(),
+  },
+  'restore:lastOutcome': { input: NoInput, output: RestoreOutcomeSchema },
 } as const;
 
 export type IpcContract = typeof ipcContract;
@@ -95,7 +146,14 @@ export interface IpcError {
 
 export type IpcResult<T> = { ok: true; data: T } | { ok: false; error: IpcError };
 
-/** The single function the preload bridge exposes on `window.nexodesk`. */
+/** Events pushed from the main process to the screen. */
+export type AppEvent =
+  | { type: 'backup.started'; kind: string }
+  | { type: 'backup.finished'; kind: string; status: 'success' | 'partial' | 'failed'; error: string | null };
+
+/** The API the preload bridge exposes on `window.nexodesk`. */
 export interface NexoDeskBridge {
   invoke<C extends IpcChannel>(channel: C, input?: IpcInput<C>): Promise<IpcResult<IpcOutput<C>>>;
+  /** Subscribes to app events; returns a function that unsubscribes. */
+  onEvent(listener: (event: AppEvent) => void): () => void;
 }

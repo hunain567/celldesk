@@ -1,11 +1,11 @@
-import { IPC_CHANNEL_NAMES, IPC_INVOKE_CHANNEL } from '@nexodesk/shared/channels';
-import { contextBridge, ipcRenderer } from 'electron';
+import { IPC_CHANNEL_NAMES, IPC_EVENT_CHANNEL, IPC_INVOKE_CHANNEL } from '@nexodesk/shared/channels';
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 
 const allowed = new Set<string>(IPC_CHANNEL_NAMES);
 
 /**
- * The only API the renderer receives. It can call listed channels and nothing
- * else: no Node.js, no file system, no raw ipcRenderer.
+ * The only API the renderer receives. It can call listed channels and listen
+ * to app events, and nothing else: no Node.js, no file system, no raw ipcRenderer.
  */
 const bridge = Object.freeze({
   invoke(channel: string, input?: unknown): Promise<unknown> {
@@ -13,6 +13,11 @@ const bridge = Object.freeze({
       return Promise.resolve({ ok: false, error: { code: 'UNKNOWN_CHANNEL', message: 'Unknown request' } });
     }
     return ipcRenderer.invoke(IPC_INVOKE_CHANNEL, channel, input);
+  },
+  onEvent(listener: (event: unknown) => void): () => void {
+    const handler = (_event: IpcRendererEvent, payload: unknown) => listener(payload);
+    ipcRenderer.on(IPC_EVENT_CHANNEL, handler);
+    return () => ipcRenderer.removeListener(IPC_EVENT_CHANNEL, handler);
   },
 });
 

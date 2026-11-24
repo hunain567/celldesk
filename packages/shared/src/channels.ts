@@ -9,7 +9,23 @@ export const IPC_CHANNEL_NAMES = [
   'settings:get',
   'settings:set',
   'audit:verify',
+  'backup:status',
+  'backup:chooseFolder',
+  'backup:setup',
+  'backup:addDestination',
+  'backup:removeDestination',
+  'backup:setSchedule',
+  'backup:runNow',
+  'backup:history',
+  'restore:chooseFile',
+  'restore:inspect',
+  'restore:verify',
+  'restore:start',
+  'restore:lastOutcome',
 ] as const;
 
 /** The single Electron IPC channel used for all request/response calls. */
 export const IPC_INVOKE_CHANNEL = 'nexodesk:invoke';
+
+/** The single Electron channel the main process uses to push events to the screen. */
+export const IPC_EVENT_CHANNEL = 'nexodesk:event';

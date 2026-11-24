@@ -9,6 +9,8 @@ import { registerHandlers } from '../src/main/ipc/handlers';
 import { IpcRouter } from '../src/main/ipc/router';
 import { AuditLog } from '../src/main/services/audit';
 import { SettingsStore } from '../src/main/services/settings';
+import { PathGrants, registerBackupHandlers } from '../src/main/ipc/backup-handlers';
+import { createShop } from './backup-env';
 import { tempDir, TEST_KEY } from './helpers';
 
 const context = { senderUrl: 'file:///app/renderer/index.html' };
@@ -49,7 +51,57 @@ describe('IPC router', () => {
   });
 
   it('has a handler for every channel in the contract', () => {
-    expect(router.missingHandlers()).toEqual([]);
+    const shop = createShop();
+    try {
+      registerBackupHandlers(router, {
+        backups: shop.backups,
+        restore: shop.restore,
+        grants: new PathGrants(),
+        chooseFolder: async () => null,
+        chooseBackupFile: async () => null,
+        runBackup: (kind) => shop.backups.run(kind),
+        onRestorePrepared: () => undefined,
+        lastRestoreOutcome: () => null,
+      });
+      expect(router.missingHandlers()).toEqual([]);
+    } finally {
+      shop.cleanup();
+    }
+  });
+
+  it('only accepts backup paths the user picked in a dialog', async () => {
+    const shop = createShop();
+    try {
+      const grants = new PathGrants();
+      const picked = shop.destination;
+      registerBackupHandlers(router, {
+        backups: shop.backups,
+        restore: shop.restore,
+        grants,
+        chooseFolder: async () => picked,
+        chooseBackupFile: async () => null,
+        runBackup: (kind) => shop.backups.run(kind),
+        onRestorePrepared: () => undefined,
+        lastRestoreOutcome: () => null,
+      });
+      const sneaky = await router.dispatch(
+        'backup:setup',
+        { destinationPath: 'C:\\Windows\\System32', recoveryPassword: 'long enough pw' },
+        context,
+      );
+      expect(sneaky.ok).toBe(false);
+      if (!sneaky.ok) expect(sneaky.error.code).toBe('FORBIDDEN');
+
+      expect(await router.dispatch('backup:chooseFolder', undefined, context)).toEqual({ ok: true, data: { path: picked } });
+      const allowed = await router.dispatch(
+        'backup:setup',
+        { destinationPath: picked, recoveryPassword: 'long enough pw' },
+        context,
+      );
+      expect(allowed).toEqual({ ok: true, data: null });
+    } finally {
+      shop.cleanup();
+    }
   });
 
   it('refuses unknown channels', async () => {

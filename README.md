@@ -50,7 +50,11 @@ docs/                Architecture and decisions
 | --- | --- |
 | `data\nexodesk.db` | Business database, encrypted (SQLCipher v4) |
 | `keys\database.key` | Database key, protected by Windows DPAPI |
-| `safety\` | Verified copies taken before database upgrades |
-| `logs\` | Daily log files, kept 30 days |
+| `safety\` | Verified copies taken before database upgrades and restores |
+| `restore\` | Restore journal and staged database during a restore |
+| `tmp\` | Scratch files, emptied at every start |
+| `logs\` | Daily log files (kept 30 days), `backup-journal.jsonl`, `restore-journal.jsonl` |
+
+Backups themselves are written to the locations chosen in the app, under `NexoDesk Backups\`.
 
 The uninstaller never deletes this folder.

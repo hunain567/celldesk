@@ -1,6 +1,7 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { useId, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { AlertIcon, CheckCircleIcon, InfoIcon } from './icons';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 export function Button({
   variant = 'secondary',
@@ -94,5 +95,55 @@ export function Properties({ items }: { items: Array<{ label: string; value: Rea
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Label, control, hint and error laid out consistently. The control receives the generated id. */
+export function Field({
+  label,
+  hint,
+  error,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  error?: string | null;
+  children: (id: string) => ReactNode;
+}) {
+  const id = useId();
+  return (
+    <div className="cd-field">
+      <label className="cd-field__label" htmlFor={id}>
+        {label}
+      </label>
+      {children(id)}
+      {error ? <div className="cd-field__error">{error}</div> : hint ? <div className="cd-field__hint">{hint}</div> : null}
+    </div>
+  );
+}
+
+type BannerTone = 'info' | 'success' | 'warning' | 'danger';
+
+export function Banner({
+  tone,
+  title,
+  children,
+  actions,
+}: {
+  tone: BannerTone;
+  title: string;
+  children?: ReactNode;
+  actions?: ReactNode;
+}) {
+  const Icon = tone === 'success' ? CheckCircleIcon : tone === 'info' ? InfoIcon : AlertIcon;
+  return (
+    <div className={`cd-banner cd-banner--${tone}`} role={tone === 'danger' || tone === 'warning' ? 'alert' : 'status'}>
+      <Icon />
+      <div style={{ flex: 1 }}>
+        <div className="cd-banner__title">{title}</div>
+        {children ? <div className="cd-banner__text">{children}</div> : null}
+      </div>
+      {actions}
+    </div>
   );
 }

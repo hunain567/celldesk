@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync, rmSync } from 'node:fs';
+import { journalPath, recoverInterruptedRestore, type RecoveryOutcome } from '../backup/swap';
 import { join } from 'node:path';
 import { checkIntegrity, openDatabase, snapshotDatabase, type SqliteDatabase } from './connection';
 import { loadOrCreateDatabaseKey, type SecretProtector } from './keystore';
@@ -13,6 +14,10 @@ export interface DataLocations {
   keyPath: string;
   safetyDirectory: string;
   logDirectory: string;
+  /** Scratch space for snapshots and extraction; emptied at start-up. */
+  tempDirectory: string;
+  /** Holds the restore journal and the staged database during a restore. */
+  restoreDirectory: string;
 }
 
 export function resolveDataLocations(root: string): DataLocations {
@@ -22,6 +27,8 @@ export function resolveDataLocations(root: string): DataLocations {
     keyPath: join(root, 'keys', 'database.key'),
     safetyDirectory: join(root, 'safety'),
     logDirectory: join(root, 'logs'),
+    tempDirectory: join(root, 'tmp'),
+    restoreDirectory: join(root, 'restore'),
   };
 }
 
@@ -74,6 +81,21 @@ export interface BootstrapResult {
   migration: MigrateResult;
   installId: string;
   latestSchemaVersion: number;
+  /** What happened to a restore that was in progress when the app last stopped. */
+  restoreOutcome: RecoveryOutcome;
+}
+
+function isHealthyDatabase(path: string, hexKey: string): boolean {
+  try {
+    const db = openDatabase(path, hexKey);
+    try {
+      return checkIntegrity(db).ok;
+    } finally {
+      db.close();
+    }
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -92,6 +114,14 @@ export function bootstrapDatabase(options: {
     protector,
   });
 
+  // Scratch files from a previous run are never needed again.
+  rmSync(locations.tempDirectory, { recursive: true, force: true });
+
+  // Finish or undo a restore that was interrupted (for example by a power cut).
+  const restoreOutcome = recoverInterruptedRestore(journalPath(locations.restoreDirectory), (path) =>
+    isHealthyDatabase(path, hexKey),
+  );
+
   const db = openDatabase(locations.databasePath, hexKey);
   try {
     const migration = migrate(db, migrations, {
@@ -100,7 +130,7 @@ export function bootstrapDatabase(options: {
         createVerifiedSafetyCopy(db, hexKey, locations.safetyDirectory, `pre-migration-v${fromVersion}`),
     });
     const installId = ensureInstallId(db);
-    return { db, hexKey, migration, installId, latestSchemaVersion: latestVersion(migrations) };
+    return { db, hexKey, migration, installId, latestSchemaVersion: latestVersion(migrations), restoreOutcome };
   } catch (error) {
     db.close();
     throw error;
