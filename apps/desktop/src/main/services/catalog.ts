@@ -297,6 +297,8 @@ export class CatalogService {
            CASE s.doc_type
              WHEN 'purchase' THEN (SELECT number FROM purchases WHERE id = s.doc_id)
              WHEN 'purchase_return' THEN (SELECT number FROM purchase_returns WHERE id = s.doc_id)
+             WHEN 'sale' THEN (SELECT number FROM sales WHERE id = s.doc_id)
+             WHEN 'sale_return' THEN (SELECT number FROM sale_returns WHERE id = s.doc_id)
            END AS doc_number
          FROM stock_ledger s WHERE s.device_id = ? ORDER BY s.id`,
       )

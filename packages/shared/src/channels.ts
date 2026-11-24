@@ -65,6 +65,14 @@ export const IPC_CHANNEL_NAMES = [
   'purchases:create',
   'purchaseReturns:list',
   'purchaseReturns:create',
+  'customers:list',
+  'customers:create',
+  'pos:lookup',
+  'sales:list',
+  'sales:get',
+  'sales:create',
+  'saleReturns:list',
+  'saleReturns:create',
 ] as const;
 
 /** The single Electron IPC channel used for all request/response calls. */

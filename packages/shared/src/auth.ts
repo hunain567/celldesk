@@ -31,6 +31,10 @@ export const PermissionSchema = z.enum([
   'purchase.view',
   'purchase.create',
   'purchase.return',
+  'sale.view',
+  'sale.create',
+  'sale.return',
+  'sale.belowMinimum',
 ]);
 export type Permission = z.infer<typeof PermissionSchema>;
 
@@ -47,8 +51,12 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     'purchase.view',
     'purchase.create',
     'purchase.return',
+    'sale.view',
+    'sale.create',
+    'sale.return',
+    'sale.belowMinimum',
   ],
-  salesman: ['stock.view'],
+  salesman: ['stock.view', 'sale.view', 'sale.create'],
   technician: ['stock.view'],
 };
 

@@ -139,6 +139,22 @@ signed bytes are the base64url payload, so any edit breaks the signature.
   `money_ledger` (Cash, bank and wallet accounts). Both ledgers are append-only.
 - Costs are only sent to the screen for roles with `cost.view`.
 
+## Sales and returns
+
+- Point of sale: scan an IMEI or barcode, or pick a handset from stock. Prices can be changed per line;
+  a bill discount is spread over the lines (`net_unit_price`). A handset below its minimum price needs
+  `sale.belowMinimum` (owner and manager).
+- A walk-in sale is paid in full. With a customer, the unpaid part goes on the customer's account
+  (`party_ledger`, positive balance = customer owes the shop). Payments can be split across accounts.
+- Returns are valued at the price the customer actually paid. They are refunded from an account or,
+  for a customer, credited to their account. Handsets go back in stock; accessories go back at their
+  original cost and the moving average follows.
+- An exchange is a return and a sale saved in one transaction: the returned value pays for the new sale
+  first; any extra is refunded (or credited to the customer).
+- Sales, sale lines, payments and returns are immutable (triggers refuse UPDATE and DELETE).
+- Receipts print from the screen (`window.print()`) on 80 mm receipt printers or A4; the choice is the
+  `pos.receiptPaper` setting.
+
 ## Milestones
 
 | Milestone | Status |
@@ -148,5 +164,6 @@ signed bytes are the base64url payload, so any edit breaks the signature.
 | M2 Licensing | Done: signed device-bound licences, clock guard, Licence screen, License Manager app |
 | M3 Users and setup | Done: setup wizard, sign-in with password or PIN, roles, Users and Shop screens, auto-lock |
 | M4 Inventory and Purchases | Done: catalogue, IMEI stock, suppliers and payments, purchases, purchase returns |
-| M5 POS and sales | Next |
-| M6–M8 | Planned |
+| M5 POS and sales | Done: point of sale, customers, receipts, returns, exchanges |
+| M6 Khata and cash | Next |
+| M7–M8 | Planned |

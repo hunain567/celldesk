@@ -43,6 +43,17 @@ import {
   VariantUpdateSchema,
 } from './inventory';
 import { LicenseStatusSchema } from './license';
+import {
+  CustomerInputSchema,
+  CustomerSummarySchema,
+  PosLookupSchema,
+  ReceiptPaperSchema,
+  SaleDetailSchema,
+  SaleInputSchema,
+  SaleReturnInputSchema,
+  SaleReturnSummarySchema,
+  SaleSummarySchema,
+} from './sales';
 
 /**
  * IPC contract shared by the renderer, the preload bridge and the main process.
@@ -61,6 +72,8 @@ export const settingSchemas = {
   'ui.sidebarCollapsed': z.boolean(),
   /** Minutes without activity before the screen locks (owner setting). */
   'security.autoLockMinutes': z.number().int().min(1).max(240),
+  /** Paper the receipt printer uses. */
+  'pos.receiptPaper': ReceiptPaperSchema,
 } as const;
 export type SettingKey = keyof typeof settingSchemas;
 export type SettingValue<K extends SettingKey> = z.infer<(typeof settingSchemas)[K]>;
@@ -222,6 +235,16 @@ export const ipcContract = {
   'purchases:create': { input: PurchaseInputSchema, output: z.object({ id: z.number(), number: z.string() }) },
   'purchaseReturns:list': { input: z.object({ limit: z.number().int().min(1).max(500) }), output: z.array(PurchaseReturnSummarySchema) },
   'purchaseReturns:create': { input: PurchaseReturnInputSchema, output: z.object({ id: z.number(), number: z.string() }) },
+
+  'customers:list': { input: z.object({ query: z.string().max(100).optional(), limit: z.number().int().min(1).max(500) }), output: z.array(CustomerSummarySchema) },
+  'customers:create': { input: CustomerInputSchema, output: Created },
+
+  'pos:lookup': { input: z.object({ code: z.string().trim().min(1).max(64) }), output: PosLookupSchema.nullable() },
+  'sales:list': { input: z.object({ query: z.string().max(100).optional(), limit: z.number().int().min(1).max(500) }), output: z.array(SaleSummarySchema) },
+  'sales:get': { input: z.object({ id: z.number().int().positive() }), output: SaleDetailSchema },
+  'sales:create': { input: SaleInputSchema, output: z.object({ id: z.number(), number: z.string() }) },
+  'saleReturns:list': { input: z.object({ limit: z.number().int().min(1).max(500) }), output: z.array(SaleReturnSummarySchema) },
+  'saleReturns:create': { input: SaleReturnInputSchema, output: z.object({ id: z.number(), number: z.string() }) },
 } as const;
 
 export type IpcContract = typeof ipcContract;

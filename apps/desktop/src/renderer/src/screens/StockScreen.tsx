@@ -7,7 +7,12 @@ import { Badge, Banner, Button, Panel, Properties, Segmented } from '../componen
 import { call, errorMessage } from '../lib/api';
 import { formatDateTime } from '../lib/format';
 
-const DOC_TYPES: Record<string, string> = { purchase: 'Received (purchase)', purchase_return: 'Returned to supplier' };
+const DOC_TYPES: Record<string, string> = {
+  purchase: 'Received (purchase)',
+  purchase_return: 'Returned to supplier',
+  sale: 'Sold',
+  sale_return: 'Returned by customer',
+};
 
 /** Everything known about one handset, from either IMEI. */
 export function DeviceDialog({ device, onClose }: { device: DeviceDetail; onClose: () => void }) {

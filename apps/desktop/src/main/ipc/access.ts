@@ -92,6 +92,16 @@ export const ACCESS_RULES: Record<IpcChannel, AccessRule> = {
   'purchases:create': need('purchase.create'),
   'purchaseReturns:list': need('purchase.view'),
   'purchaseReturns:create': need('purchase.return'),
+
+  'customers:list': need('sale.view'),
+  'customers:create': need('sale.create'),
+
+  'pos:lookup': need('sale.create'),
+  'sales:list': need('sale.view'),
+  'sales:get': need('sale.view'),
+  'sales:create': need('sale.create'),
+  'saleReturns:list': need('sale.view'),
+  'saleReturns:create': need('sale.return'),
 };
 
 const SIGN_IN: IpcError = { code: 'UNAUTHENTICATED', message: 'Please sign in to continue.' };

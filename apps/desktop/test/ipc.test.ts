@@ -13,6 +13,8 @@ import { PathGrants, registerBackupHandlers } from '../src/main/ipc/backup-handl
 import { registerLicenseHandlers } from '../src/main/ipc/license-handlers';
 import { registerAuthHandlers } from '../src/main/ipc/auth-handlers';
 import { registerInventoryHandlers } from '../src/main/ipc/inventory-handlers';
+import { registerSalesHandlers } from '../src/main/ipc/sales-handlers';
+import { SalesService } from '../src/main/services/sales';
 import { CatalogService } from '../src/main/services/catalog';
 import { PurchasingService } from '../src/main/services/purchasing';
 import { SessionManager } from '../src/main/services/session';
@@ -89,6 +91,7 @@ describe('IPC router', () => {
         purchasing: new PurchasingService(businessContext),
         session: new SessionManager(() => 60000),
       });
+      registerSalesHandlers(router, { sales: new SalesService(businessContext), session: new SessionManager(() => 60000) });
       expect(router.missingHandlers()).toEqual([]);
     } finally {
       shop.cleanup();

@@ -5,6 +5,7 @@ export const settingDefaults: { [K in SettingKey]: SettingValue<K> } = {
   'ui.theme': 'system',
   'ui.sidebarCollapsed': false,
   'security.autoLockMinutes': 15,
+  'pos.receiptPaper': '80mm',
 };
 
 export class SettingValidationError extends Error {

@@ -5,3 +5,4 @@ export * from './inventory';
 export * from './ipc';
 export * from './license';
 export * from './money';
+export * from './sales';

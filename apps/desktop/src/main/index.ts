@@ -13,6 +13,8 @@ import { registerLicenseHandlers } from './ipc/license-handlers';
 import { ACCESS_RULES, checkAccess } from './ipc/access';
 import { registerAuthHandlers } from './ipc/auth-handlers';
 import { registerInventoryHandlers } from './ipc/inventory-handlers';
+import { registerSalesHandlers } from './ipc/sales-handlers';
+import { SalesService } from './services/sales';
 import { CatalogService } from './services/catalog';
 import { PurchasingService } from './services/purchasing';
 import { SessionManager } from './services/session';
@@ -246,6 +248,7 @@ async function start(): Promise<void> {
     purchasing: new PurchasingService(businessContext),
     session,
   });
+  registerSalesHandlers(router, { sales: new SalesService(businessContext), session });
 
   let mainWindow: BrowserWindow | null = null;
   registerBackupHandlers(router, {
