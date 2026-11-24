@@ -12,6 +12,9 @@ import { SettingsStore } from '../src/main/services/settings';
 import { PathGrants, registerBackupHandlers } from '../src/main/ipc/backup-handlers';
 import { registerLicenseHandlers } from '../src/main/ipc/license-handlers';
 import { registerAuthHandlers } from '../src/main/ipc/auth-handlers';
+import { registerInventoryHandlers } from '../src/main/ipc/inventory-handlers';
+import { CatalogService } from '../src/main/services/catalog';
+import { PurchasingService } from '../src/main/services/purchasing';
 import { SessionManager } from '../src/main/services/session';
 import { UserService } from '../src/main/services/users';
 import type { LicenseService } from '../src/main/licensing/service';
@@ -79,6 +82,12 @@ describe('IPC router', () => {
         session: new SessionManager(() => 60000),
         settings: new SettingsStore(db),
         onSessionEnded: () => undefined,
+      });
+      const businessContext = { db, audit: new AuditLog(db), assertCanWrite: () => undefined };
+      registerInventoryHandlers(router, {
+        catalog: new CatalogService(businessContext),
+        purchasing: new PurchasingService(businessContext),
+        session: new SessionManager(() => 60000),
       });
       expect(router.missingHandlers()).toEqual([]);
     } finally {

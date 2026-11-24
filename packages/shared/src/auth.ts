@@ -23,14 +23,33 @@ export const PermissionSchema = z.enum([
   'license.manage',
   'system.check',
   'audit.verify',
+  'catalog.manage',
+  'stock.view',
+  'cost.view',
+  'supplier.manage',
+  'supplier.pay',
+  'purchase.view',
+  'purchase.create',
+  'purchase.return',
 ]);
 export type Permission = z.infer<typeof PermissionSchema>;
 
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   owner: PermissionSchema.options,
-  manager: ['backup.run', 'system.check'],
-  salesman: [],
-  technician: [],
+  manager: [
+    'backup.run',
+    'system.check',
+    'catalog.manage',
+    'stock.view',
+    'cost.view',
+    'supplier.manage',
+    'supplier.pay',
+    'purchase.view',
+    'purchase.create',
+    'purchase.return',
+  ],
+  salesman: ['stock.view'],
+  technician: ['stock.view'],
 };
 
 export function roleHas(role: Role, permission: Permission): boolean {

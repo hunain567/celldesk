@@ -83,7 +83,7 @@ describe('users and sign-in', () => {
     expect(ali).toMatchObject({ role: 'salesman', hasPin: true });
     await expect(users.loginWithPin(ali.id, '4321')).rejects.toThrow(/password first/);
     const session = await users.loginWithPassword('ali', 'temp-pass-1');
-    expect(session).toMatchObject({ mustChangePassword: true, permissions: [] });
+    expect(session).toMatchObject({ mustChangePassword: true, permissions: ['stock.view'] });
     const changed = await users.changeOwnPassword(ali.id, 'temp-pass-1', 'my-own-pass');
     expect(changed.mustChangePassword).toBe(false);
     expect((await users.loginWithPin(ali.id, '4321')).username).toBe('ali');

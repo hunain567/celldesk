@@ -18,6 +18,30 @@ import {
   UserPasswordSchema,
   UserSummarySchema,
 } from './auth';
+import {
+  AccountSummarySchema,
+  BrandInputSchema,
+  BrandSummarySchema,
+  DeviceDetailSchema,
+  ItemInputSchema,
+  ItemSummarySchema,
+  ItemUpdateSchema,
+  ModelInputSchema,
+  PurchaseDetailSchema,
+  PurchaseInputSchema,
+  PurchaseReturnInputSchema,
+  PurchaseReturnSummarySchema,
+  PurchaseSummarySchema,
+  StockDeviceSchema,
+  SupplierInputSchema,
+  SupplierPaymentInputSchema,
+  SupplierStatementSchema,
+  SupplierSummarySchema,
+  SupplierUpdateSchema,
+  VariantInputSchema,
+  VariantSummarySchema,
+  VariantUpdateSchema,
+} from './inventory';
 import { LicenseStatusSchema } from './license';
 
 /**
@@ -72,6 +96,8 @@ export const IntegrityResultSchema = z.object({
 export type IntegrityResult = z.infer<typeof IntegrityResultSchema>;
 
 const NoInput = z.undefined();
+const Created = z.object({ id: z.number() });
+const ListQuery = z.object({ query: z.string().max(100).optional(), includeInactive: z.boolean().optional() });
 const ChosenPathSchema = z.object({ path: z.string().nullable() });
 const PathInput = z.object({ path: z.string().min(1).max(1024) });
 const RecoveryPasswordInput = z.string().max(256);
@@ -165,6 +191,37 @@ export const ipcContract = {
 
   'shop:get': { input: NoInput, output: ShopProfileSchema.nullable() },
   'shop:update': { input: ShopProfileSchema, output: z.null() },
+
+  'catalog:brands': { input: NoInput, output: z.array(BrandSummarySchema) },
+  'catalog:createBrand': { input: BrandInputSchema, output: Created },
+  'catalog:createModel': { input: ModelInputSchema, output: Created },
+  'catalog:variants': { input: ListQuery, output: z.array(VariantSummarySchema) },
+  'catalog:createVariant': { input: VariantInputSchema, output: Created },
+  'catalog:updateVariant': { input: VariantUpdateSchema, output: z.null() },
+  'catalog:items': { input: ListQuery, output: z.array(ItemSummarySchema) },
+  'catalog:createItem': { input: ItemInputSchema, output: Created },
+  'catalog:updateItem': { input: ItemUpdateSchema, output: z.null() },
+
+  'stock:devices': { input: z.object({ variantId: z.number().int().positive() }), output: z.array(StockDeviceSchema) },
+  'stock:lookupImei': { input: z.object({ imei: z.string().trim().min(1).max(20) }), output: DeviceDetailSchema.nullable() },
+
+  'accounts:list': { input: NoInput, output: z.array(AccountSummarySchema) },
+
+  'suppliers:list': { input: z.object({ includeInactive: z.boolean().optional() }), output: z.array(SupplierSummarySchema) },
+  'suppliers:create': { input: SupplierInputSchema, output: Created },
+  'suppliers:update': { input: SupplierUpdateSchema, output: z.null() },
+  'suppliers:statement': { input: z.object({ supplierId: z.number().int().positive() }), output: SupplierStatementSchema },
+  'suppliers:pay': { input: SupplierPaymentInputSchema, output: z.object({ number: z.string() }) },
+
+  'purchases:list': { input: z.object({ query: z.string().max(100).optional(), limit: z.number().int().min(1).max(500) }), output: z.array(PurchaseSummarySchema) },
+  'purchases:get': { input: z.object({ id: z.number().int().positive() }), output: PurchaseDetailSchema },
+  'purchases:checkImeis': {
+    input: z.object({ imeis: z.array(z.string().max(20)).max(1000) }),
+    output: z.array(z.object({ imei: z.string(), message: z.string() })),
+  },
+  'purchases:create': { input: PurchaseInputSchema, output: z.object({ id: z.number(), number: z.string() }) },
+  'purchaseReturns:list': { input: z.object({ limit: z.number().int().min(1).max(500) }), output: z.array(PurchaseReturnSummarySchema) },
+  'purchaseReturns:create': { input: PurchaseReturnInputSchema, output: z.object({ id: z.number(), number: z.string() }) },
 } as const;
 
 export type IpcContract = typeof ipcContract;

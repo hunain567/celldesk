@@ -64,6 +64,34 @@ export const ACCESS_RULES: Record<IpcChannel, AccessRule> = {
 
   'shop:get': session,
   'shop:update': need('shop.manage'),
+
+  'catalog:brands': need('stock.view'),
+  'catalog:createBrand': need('catalog.manage'),
+  'catalog:createModel': need('catalog.manage'),
+  'catalog:variants': need('stock.view'),
+  'catalog:createVariant': need('catalog.manage'),
+  'catalog:updateVariant': need('catalog.manage'),
+  'catalog:items': need('stock.view'),
+  'catalog:createItem': need('catalog.manage'),
+  'catalog:updateItem': need('catalog.manage'),
+
+  'stock:devices': need('stock.view'),
+  'stock:lookupImei': need('stock.view'),
+
+  'accounts:list': session,
+
+  'suppliers:list': need('purchase.view'),
+  'suppliers:create': need('supplier.manage'),
+  'suppliers:update': need('supplier.manage'),
+  'suppliers:statement': need('purchase.view'),
+  'suppliers:pay': need('supplier.pay'),
+
+  'purchases:list': need('purchase.view'),
+  'purchases:get': need('purchase.view'),
+  'purchases:checkImeis': need('purchase.create'),
+  'purchases:create': need('purchase.create'),
+  'purchaseReturns:list': need('purchase.view'),
+  'purchaseReturns:create': need('purchase.return'),
 };
 
 const SIGN_IN: IpcError = { code: 'UNAUTHENTICATED', message: 'Please sign in to continue.' };

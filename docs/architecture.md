@@ -125,6 +125,20 @@ signed bytes are the base64url payload, so any edit breaks the signature.
   (default 15 minutes); the screen also locks itself on inactivity.
 - The audit log records the signed-in username for every action.
 
+## Inventory and purchases
+
+- Catalogue: brands → models → variants (RAM/storage/colour, sale price and minimum price); accessories
+  and parts are items with an optional barcode and reorder level.
+- Every handset is one `devices` row keyed by IMEI 1 (IMEI 2 optional). IMEIs are Luhn-checked and must be
+  unique across the whole history; the purchase form checks them live and the service checks again on save.
+- Accessories are counted in `stock_ledger` and valued at moving average cost.
+- Purchases are posted once and never edited. A purchase discount is spread over the unit costs. Mistakes
+  are corrected with a purchase return (handsets by IMEI, must still be in stock and from that supplier),
+  optionally with a refund into a money account.
+- Suppliers have a running balance in `party_ledger`; payments and refunds move money through
+  `money_ledger` (Cash, bank and wallet accounts). Both ledgers are append-only.
+- Costs are only sent to the screen for roles with `cost.view`.
+
 ## Milestones
 
 | Milestone | Status |
@@ -133,5 +147,6 @@ signed bytes are the base64url payload, so any edit breaks the signature.
 | M1 Backup and Restore | Done: engine, schedule, retention, Restore Center, crash-safe swap, 36 backup/restore tests |
 | M2 Licensing | Done: signed device-bound licences, clock guard, Licence screen, License Manager app |
 | M3 Users and setup | Done: setup wizard, sign-in with password or PIN, roles, Users and Shop screens, auto-lock |
-| M4 Inventory and Purchases | Next |
-| M5–M8 | Planned |
+| M4 Inventory and Purchases | Done: catalogue, IMEI stock, suppliers and payments, purchases, purchase returns |
+| M5 POS and sales | Next |
+| M6–M8 | Planned |

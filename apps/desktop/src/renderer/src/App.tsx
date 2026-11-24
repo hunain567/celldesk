@@ -2,12 +2,16 @@ import type { LicenseStatus, Permission } from '@nexodesk/shared';
 import { ROLE_LABELS } from '@nexodesk/shared';
 import { useCallback, useEffect, useState, type ComponentType, type ReactElement, type SVGProps } from 'react';
 import { ChangePasswordDialog } from './components/ChangePasswordDialog';
-import { BackupIcon, DeviceIcon, KeyIcon, LockIcon, RestoreIcon, StoreIcon, SystemIcon, UsersIcon } from './components/icons';
+import { BackupIcon, BoxIcon, CartIcon, DeviceIcon, KeyIcon, LockIcon, RestoreIcon, StoreIcon, SystemIcon, TagIcon, TruckIcon, UsersIcon } from './components/icons';
 import { useToast } from './components/toast';
 import { Banner, Button } from './components/ui';
 import { call } from './lib/api';
 import { useAuth } from './lib/auth';
 import { BackupScreen } from './screens/BackupScreen';
+import { CatalogueScreen } from './screens/CatalogueScreen';
+import { PurchasesScreen } from './screens/PurchasesScreen';
+import { StockScreen } from './screens/StockScreen';
+import { SuppliersScreen } from './screens/SuppliersScreen';
 import { LicenseScreen, LICENSE_STATE_LABELS } from './screens/LicenseScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { RestoreScreen } from './screens/RestoreScreen';
@@ -35,6 +39,20 @@ interface ScreenDefinition {
  * Each module adds its own entries when it is built.
  */
 const sections: Array<{ label: string; screens: ScreenDefinition[] }> = [
+  {
+    label: 'Inventory',
+    screens: [
+      { id: 'stock', label: 'Stock', icon: BoxIcon, permission: 'stock.view', render: () => <StockScreen /> },
+      { id: 'catalogue', label: 'Catalogue', icon: TagIcon, permission: 'catalog.manage', render: () => <CatalogueScreen /> },
+    ],
+  },
+  {
+    label: 'Purchasing',
+    screens: [
+      { id: 'purchases', label: 'Purchases', icon: CartIcon, permission: 'purchase.view', render: () => <PurchasesScreen /> },
+      { id: 'suppliers', label: 'Suppliers', icon: TruckIcon, permission: 'purchase.view', render: () => <SuppliersScreen /> },
+    ],
+  },
   {
     label: 'Data safety',
     screens: [

@@ -10,9 +10,9 @@ import { formatDateTime } from '../lib/format';
 
 const ROLE_HELP: Record<Role, string> = {
   owner: 'Everything, including users, restore and licence',
-  manager: 'Backups and system checks (more as modules are added)',
-  salesman: 'Counter work (sales arrive with the POS module)',
-  technician: 'Repair jobs (arrive with the repairs module)',
+  manager: 'Purchases, suppliers, catalogue, stock with cost prices, backups',
+  salesman: 'Stock lookup without cost prices (sales arrive with the POS module)',
+  technician: 'Stock lookup (repair jobs arrive with the repairs module)',
 };
 
 function RoleSelect({ id, value, onChange }: { id: string; value: Role; onChange: (role: Role) => void }) {

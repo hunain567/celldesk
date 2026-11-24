@@ -6,6 +6,7 @@
 
 /* ---------- Sidebar ---------- */
 .cd-sidebar {
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);

@@ -163,3 +163,41 @@ export function LockIcon(props: SVGProps<SVGSVGElement>) {
     </Base>
   );
 }
+
+export function BoxIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="m3.5 7.5 8.5-4 8.5 4v9l-8.5 4-8.5-4v-9Z" />
+      <path d="m3.5 7.5 8.5 4 8.5-4M12 11.5v9" />
+    </Base>
+  );
+}
+
+export function TagIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-6.4 6.4a1.5 1.5 0 0 1-2.1 0L3.5 12.2Z" />
+      <circle cx="8" cy="8" r="1.5" />
+    </Base>
+  );
+}
+
+export function TruckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3v3h-7" />
+      <circle cx="6.5" cy="17.5" r="1.75" />
+      <circle cx="17" cy="17.5" r="1.75" />
+    </Base>
+  );
+}
+
+export function CartIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M3 4h2l2.2 10.2a1.5 1.5 0 0 0 1.5 1.3h8.6a1.5 1.5 0 0 0 1.5-1.2L20.5 8H6" />
+      <circle cx="9.5" cy="19.5" r="1.25" />
+      <circle cx="17" cy="19.5" r="1.25" />
+    </Base>
+  );
+}

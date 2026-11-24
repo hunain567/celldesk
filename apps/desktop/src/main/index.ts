@@ -12,6 +12,9 @@ import { PathGrants, registerBackupHandlers } from './ipc/backup-handlers';
 import { registerLicenseHandlers } from './ipc/license-handlers';
 import { ACCESS_RULES, checkAccess } from './ipc/access';
 import { registerAuthHandlers } from './ipc/auth-handlers';
+import { registerInventoryHandlers } from './ipc/inventory-handlers';
+import { CatalogService } from './services/catalog';
+import { PurchasingService } from './services/purchasing';
 import { SessionManager } from './services/session';
 import { UserService } from './services/users';
 import { registerHandlers } from './ipc/handlers';
@@ -236,6 +239,12 @@ async function start(): Promise<void> {
     session,
     settings,
     onSessionEnded: () => sendEvent({ type: 'session.ended' }),
+  });
+  const businessContext = { db, audit, assertCanWrite: () => license.assertCanWrite() };
+  registerInventoryHandlers(router, {
+    catalog: new CatalogService(businessContext),
+    purchasing: new PurchasingService(businessContext),
+    session,
   });
 
   let mainWindow: BrowserWindow | null = null;
