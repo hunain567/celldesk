@@ -27,6 +27,21 @@ export const IPC_CHANNEL_NAMES = [
   'license:saveRequestFile',
   'license:importFile',
   'license:importCode',
+  'setup:state',
+  'setup:createShop',
+  'auth:session',
+  'auth:loginPassword',
+  'auth:loginPin',
+  'auth:pinUsers',
+  'auth:lock',
+  'auth:changePassword',
+  'users:list',
+  'users:create',
+  'users:update',
+  'users:resetPassword',
+  'users:setPin',
+  'shop:get',
+  'shop:update',
 ] as const;
 
 /** The single Electron IPC channel used for all request/response calls. */

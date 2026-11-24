@@ -17,6 +17,9 @@ export interface HandlerDependencies {
   latestSchemaVersion: number;
   startedAt: Date;
   app: { name: string; version: string; electronVersion: string; platform: string };
+  /** True when the signed-in user may change shop-wide security settings. */
+  canChangeSecuritySettings?: () => boolean;
+  actor?: () => string;
 }
 
 function fileSize(path: string): number {
@@ -52,7 +55,7 @@ export function registerHandlers(router: IpcRouter, deps: HandlerDependencies): 
   router.register('system:integrityCheck', () => {
     const report = checkIntegrity(deps.db);
     deps.audit.append({
-      actor: 'system',
+      actor: deps.actor?.() ?? 'system',
       action: 'database.integrity_check',
       details: { ok: report.ok, problems: report.messages.length },
     });
@@ -62,6 +65,9 @@ export function registerHandlers(router: IpcRouter, deps: HandlerDependencies): 
   router.register('settings:get', ({ key }) => deps.settings.get(key));
 
   router.register('settings:set', ({ key, value }) => {
+    if (key.startsWith('security.') && !(deps.canChangeSecuritySettings?.() ?? false)) {
+      throw new AppError('FORBIDDEN', 'Only the shop owner can change security settings.');
+    }
     try {
       deps.settings.set(key, value);
     } catch (error) {

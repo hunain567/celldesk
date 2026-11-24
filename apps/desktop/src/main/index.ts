@@ -10,6 +10,10 @@ import { KeyFileMissingError, KeyFileUnreadableError } from './db/keystore';
 import { MigrationFailedError, SchemaTooNewError } from './db/migrator';
 import { PathGrants, registerBackupHandlers } from './ipc/backup-handlers';
 import { registerLicenseHandlers } from './ipc/license-handlers';
+import { ACCESS_RULES, checkAccess } from './ipc/access';
+import { registerAuthHandlers } from './ipc/auth-handlers';
+import { SessionManager } from './services/session';
+import { UserService } from './services/users';
 import { registerHandlers } from './ipc/handlers';
 import { IpcRouter } from './ipc/router';
 import { logger } from './logger';
@@ -114,6 +118,9 @@ async function start(): Promise<void> {
   const { db, hexKey, migration, installId, latestSchemaVersion, restoreOutcome } = database;
   const audit = new AuditLog(db);
   const settings = new SettingsStore(db);
+  const users = new UserService(db, audit);
+  const session = new SessionManager(() => settings.get('security.autoLockMinutes') * 60 * 1000);
+  const actor = () => session.actor();
 
   audit.append({ actor: 'system', action: 'app.start', details: { version: app.getVersion() } });
   if (migration.applied.length > 0) {
@@ -152,6 +159,7 @@ async function start(): Promise<void> {
     tempDirectory: locations.tempDirectory,
     journalDirectory: locations.logDirectory,
     audit,
+    actor,
     log: (message, data) => logger.warn(message, data),
   });
   backups.recoverInterruptedRuns();
@@ -168,6 +176,7 @@ async function start(): Promise<void> {
     journalDirectory: locations.logDirectory,
     backups,
     audit,
+    actor,
     log: (message, data) => logger.warn(message, data),
   });
 
@@ -184,6 +193,7 @@ async function start(): Promise<void> {
     ]),
     revokedLicenseIds: REVOKED_LICENSE_IDS,
     audit,
+    actor,
   });
   licenseService = license;
   license.tick();
@@ -200,6 +210,8 @@ async function start(): Promise<void> {
   const router = new IpcRouter({
     validateOutput: !app.isPackaged,
     logError: (message, error) => logger.error(message, error),
+    authorize: (channel) =>
+      checkAccess(ACCESS_RULES[channel], { setupComplete: users.isSetupComplete(), user: session.current() }),
   });
   registerHandlers(router, {
     db,
@@ -216,6 +228,14 @@ async function start(): Promise<void> {
       electronVersion: process.versions.electron ?? 'unknown',
       platform: `${process.platform === 'win32' ? 'Windows' : process.platform} ${process.arch}`,
     },
+    canChangeSecuritySettings: () => session.current()?.permissions.includes('shop.manage') ?? false,
+    actor,
+  });
+  registerAuthHandlers(router, {
+    users,
+    session,
+    settings,
+    onSessionEnded: () => sendEvent({ type: 'session.ended' }),
   });
 
   let mainWindow: BrowserWindow | null = null;

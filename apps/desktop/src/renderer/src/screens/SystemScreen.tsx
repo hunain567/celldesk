@@ -5,6 +5,7 @@ import { useToast } from '../components/toast';
 import { Badge, Button, Panel, Properties, Segmented } from '../components/ui';
 import { call, errorMessage } from '../lib/api';
 import { formatBytes, formatDateTime } from '../lib/format';
+import { useAuth } from '../lib/auth';
 import { useTheme } from '../lib/theme';
 
 /**
@@ -13,6 +14,7 @@ import { useTheme } from '../lib/theme';
  */
 export function SystemScreen() {
   const notify = useToast();
+  const { can } = useAuth();
   const { theme, setTheme } = useTheme();
   const [info, setInfo] = useState<SystemInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -138,12 +140,16 @@ export function SystemScreen() {
         description="Check the database for damage and confirm no one has altered the activity log."
         actions={
           <>
-            <Button icon={<ListCheckIcon />} busy={verifying} onClick={() => void verifyAudit()}>
-              Verify activity log
-            </Button>
-            <Button variant="primary" icon={<ShieldCheckIcon />} busy={checking} onClick={() => void runIntegrityCheck()}>
-              Run integrity check
-            </Button>
+            {can('audit.verify') ? (
+              <Button icon={<ListCheckIcon />} busy={verifying} onClick={() => void verifyAudit()}>
+                Verify activity log
+              </Button>
+            ) : null}
+            {can('system.check') ? (
+              <Button variant="primary" icon={<ShieldCheckIcon />} busy={checking} onClick={() => void runIntegrityCheck()}>
+                Run integrity check
+              </Button>
+            ) : null}
           </>
         }
       >

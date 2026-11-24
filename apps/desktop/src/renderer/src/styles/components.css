@@ -238,6 +238,8 @@
 }
 .cd-input,
 .cd-select {
+  min-width: 0;
+  max-width: 100%;
   height: 34px;
   padding: 0 var(--space-3);
   border: 1px solid var(--color-border-strong);
@@ -493,4 +495,150 @@
 .cd-shell-banner {
   flex: none;
   padding: var(--space-3) var(--space-8) 0;
+}
+
+/* ---------- Dialog ---------- */
+.cd-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgb(10 12 18 / 45%);
+  animation: cd-fade-in var(--duration-normal) var(--ease-out);
+}
+.cd-dialog {
+  width: min(480px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.cd-dialog__header {
+  padding: var(--space-5) var(--space-5) 0;
+}
+.cd-dialog__body {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+.cd-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+@keyframes cd-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Sign-in and setup ---------- */
+.cd-auth {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  padding: var(--space-8);
+  background: var(--color-bg);
+}
+.cd-auth__card {
+  width: min(440px, 100%);
+  display: grid;
+  gap: var(--space-5);
+}
+.cd-auth__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.cd-auth__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+}
+.cd-wizard {
+  width: min(820px, 100%);
+  display: grid;
+  gap: var(--space-5);
+}
+.cd-wizard__progress {
+  display: flex;
+  gap: var(--space-2);
+}
+.cd-wizard__dot {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+}
+.cd-wizard__dot--done {
+  background: var(--color-accent);
+}
+.cd-choice {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+}
+.cd-choice:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-hover);
+}
+.cd-choice svg {
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent);
+}
+.cd-pin-users {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+.cd-pin-user {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+}
+.cd-pin-user[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.cd-pin-input {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  letter-spacing: 0.4em;
+  text-align: center;
+  height: 44px;
+}
+
+/* ---------- Top bar user ---------- */
+.cd-topbar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.cd-topbar__who {
+  text-align: right;
+  line-height: var(--leading-tight);
+}
+.cd-topbar__name {
+  font-weight: var(--weight-semibold);
+}
+.cd-topbar__role {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }

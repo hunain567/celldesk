@@ -1,3 +1,4 @@
+export * from './auth';
 export * from './backup';
 export * from './channels';
 export * from './ipc';

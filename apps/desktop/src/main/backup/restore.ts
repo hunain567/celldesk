@@ -16,6 +16,8 @@ import type { BackupService } from './service';
 import { journalPath, writeJournal } from './swap';
 
 export interface RestoreServiceOptions {
+  /** Username recorded in the audit log for actions taken by a person. */
+  actor?: () => string;
   db: SqliteDatabase;
   databaseKeyHex: string;
   databasePath: string;
@@ -170,7 +172,7 @@ export class RestoreService {
         startedAt: startedAt.toISOString(),
       });
       this.options.audit.append({
-        actor: 'owner',
+        actor: this.options.actor?.() ?? 'owner',
         action: 'backup.restore.prepared',
         details: { file: path, backupCreatedAt: header.createdAt, safetyCopy: safetyCopyPath },
       });

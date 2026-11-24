@@ -18,9 +18,15 @@ export class ApiError extends Error {
  * Calls a main-process channel and returns its data, or throws ApiError with a
  * message that is safe to show to the user.
  */
+/** Fired when the backend says the session has ended, so the app can show the sign-in screen. */
+export const SESSION_ENDED_EVENT = 'nexodesk:session-ended';
+
 export async function call<C extends IpcChannel>(channel: C, input?: IpcInput<C>): Promise<IpcOutput<C>> {
   const result = await window.nexodesk.invoke(channel, input);
-  if (!result.ok) throw new ApiError(result.error);
+  if (!result.ok) {
+    if (result.error.code === 'UNAUTHENTICATED') window.dispatchEvent(new Event(SESSION_ENDED_EVENT));
+    throw new ApiError(result.error);
+  }
   return result.data;
 }
 

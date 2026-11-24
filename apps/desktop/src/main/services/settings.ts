@@ -4,6 +4,7 @@ import type { SqliteDatabase } from '../db/connection';
 export const settingDefaults: { [K in SettingKey]: SettingValue<K> } = {
   'ui.theme': 'system',
   'ui.sidebarCollapsed': false,
+  'security.autoLockMinutes': 15,
 };
 
 export class SettingValidationError extends Error {

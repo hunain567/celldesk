@@ -7,6 +7,17 @@ import {
   BackupStatusSchema,
   BackupVerificationSchema,
 } from './backup';
+import {
+  NewUserSchema,
+  PinSchema,
+  PinUserSchema,
+  RoleSchema,
+  SessionUserSchema,
+  SetupStateSchema,
+  ShopProfileSchema,
+  UserPasswordSchema,
+  UserSummarySchema,
+} from './auth';
 import { LicenseStatusSchema } from './license';
 
 /**
@@ -24,6 +35,8 @@ export type Theme = z.infer<typeof ThemeSchema>;
 export const settingSchemas = {
   'ui.theme': ThemeSchema,
   'ui.sidebarCollapsed': z.boolean(),
+  /** Minutes without activity before the screen locks (owner setting). */
+  'security.autoLockMinutes': z.number().int().min(1).max(240),
 } as const;
 export type SettingKey = keyof typeof settingSchemas;
 export type SettingValue<K extends SettingKey> = z.infer<(typeof settingSchemas)[K]>;
@@ -121,6 +134,37 @@ export const ipcContract = {
   'license:saveRequestFile': { input: NoInput, output: ChosenPathSchema },
   'license:importFile': { input: NoInput, output: LicenseStatusSchema.nullable() },
   'license:importCode': { input: z.object({ code: z.string().min(10).max(20000) }), output: LicenseStatusSchema },
+
+  'setup:state': { input: NoInput, output: SetupStateSchema },
+  'setup:createShop': {
+    input: z.object({ shop: ShopProfileSchema, owner: NewUserSchema.omit({ role: true }) }),
+    output: SessionUserSchema,
+  },
+
+  'auth:session': { input: NoInput, output: SessionUserSchema.nullable() },
+  'auth:loginPassword': {
+    input: z.object({ username: z.string().trim().min(1).max(64), password: z.string().min(1).max(256) }),
+    output: SessionUserSchema,
+  },
+  'auth:loginPin': { input: z.object({ userId: z.string().min(1), pin: z.string().min(1).max(12) }), output: SessionUserSchema },
+  'auth:pinUsers': { input: NoInput, output: z.array(PinUserSchema) },
+  'auth:lock': { input: NoInput, output: z.null() },
+  'auth:changePassword': {
+    input: z.object({ currentPassword: z.string().min(1).max(256), newPassword: UserPasswordSchema }),
+    output: SessionUserSchema,
+  },
+
+  'users:list': { input: NoInput, output: z.array(UserSummarySchema) },
+  'users:create': { input: NewUserSchema, output: z.null() },
+  'users:update': {
+    input: z.object({ id: z.string(), fullName: z.string().trim().min(1).max(100), role: RoleSchema, isActive: z.boolean() }),
+    output: z.null(),
+  },
+  'users:resetPassword': { input: z.object({ id: z.string(), newPassword: UserPasswordSchema }), output: z.null() },
+  'users:setPin': { input: z.object({ id: z.string(), pin: PinSchema.nullable() }), output: z.null() },
+
+  'shop:get': { input: NoInput, output: ShopProfileSchema.nullable() },
+  'shop:update': { input: ShopProfileSchema, output: z.null() },
 } as const;
 
 export type IpcContract = typeof ipcContract;
@@ -137,6 +181,7 @@ export function isIpcChannel(value: unknown): value is IpcChannel {
 export const IpcErrorCodeSchema = z.enum([
   'VALIDATION_FAILED',
   'UNKNOWN_CHANNEL',
+  'UNAUTHENTICATED',
   'FORBIDDEN',
   'NOT_FOUND',
   'CONFLICT',
@@ -157,7 +202,8 @@ export type IpcResult<T> = { ok: true; data: T } | { ok: false; error: IpcError 
 export type AppEvent =
   | { type: 'backup.started'; kind: string }
   | { type: 'backup.finished'; kind: string; status: 'success' | 'partial' | 'failed'; error: string | null }
-  | { type: 'license.changed' };
+  | { type: 'license.changed' }
+  | { type: 'session.ended' };
 
 /** The API the preload bridge exposes on `window.nexodesk`. */
 export interface NexoDeskBridge {

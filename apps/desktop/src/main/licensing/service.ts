@@ -19,6 +19,8 @@ import type { DeviceIdentity } from './device';
 const FRESH_LICENSE_MS = 2 * 24 * 60 * 60 * 1000;
 
 export interface LicenseServiceOptions {
+  /** Username recorded in the audit log for actions taken by a person. */
+  actor?: () => string;
   licenseDirectory: string;
   /** Embedded at build time; null means this build cannot verify licences. */
   vendorPublicKeyPem: string | null;
@@ -184,7 +186,7 @@ export class LicenseService {
     }
 
     this.options.audit.append({
-      actor: 'owner',
+      actor: this.options.actor?.() ?? 'owner',
       action: 'license.import',
       entityType: 'license',
       entityId: certificate.licenseId,

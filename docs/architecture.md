@@ -109,6 +109,22 @@ signed bytes are the base64url payload, so any edit breaks the signature.
 - Limits of offline licensing: suspension and device removal take effect when the current file expires;
   revocation when the shop installs a release that lists the id.
 
+## Users, roles and setup
+
+- First run shows the setup wizard: **new shop** (shop details, owner account, backups, licence; the last
+  two can be skipped) or **restore from a backup** (allowed without sign-in only until setup is complete).
+- Accounts in `users`; passwords and PINs hashed with scrypt (N=2^15, built into Node.js, so no extra
+  native module). Owner-created accounts must choose their own password at first sign-in; a PIN only
+  works after that.
+- 5 wrong attempts lock an account for 5 minutes; an owner password reset also unlocks it. The shop
+  always keeps at least one active owner.
+- Roles and permissions are defined in `packages/shared/src/auth.ts`. Every IPC channel has an access
+  rule in `apps/desktop/src/main/ipc/access.ts` (public, setup-only, signed-in, or a permission); a test
+  fails if a channel has no rule. The screen hides what a role cannot use, and the backend refuses it anyway.
+- The session lives only in the main process and ends after the shop's auto-lock time without requests
+  (default 15 minutes); the screen also locks itself on inactivity.
+- The audit log records the signed-in username for every action.
+
 ## Milestones
 
 | Milestone | Status |
@@ -116,5 +132,6 @@ signed bytes are the base64url payload, so any edit breaks the signature.
 | M0 Foundation | Done: secure shell, encrypted DB, migrations, audit log, IPC contract, design tokens, System screen, installer config |
 | M1 Backup and Restore | Done: engine, schedule, retention, Restore Center, crash-safe swap, 36 backup/restore tests |
 | M2 Licensing | Done: signed device-bound licences, clock guard, Licence screen, License Manager app |
-| M3 Users and setup | Next |
-| M4–M8 | Planned |
+| M3 Users and setup | Done: setup wizard, sign-in with password or PIN, roles, Users and Shop screens, auto-lock |
+| M4 Inventory and Purchases | Next |
+| M5–M8 | Planned |

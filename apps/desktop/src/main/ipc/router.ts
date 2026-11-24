@@ -3,6 +3,7 @@ import {
   isIpcChannel,
   type IpcChannel,
   type IpcContract,
+  type IpcError,
   type IpcOutput,
   type IpcResult,
 } from '@nexodesk/shared';
@@ -25,6 +26,8 @@ export interface IpcRouterOptions {
   /** Validate handler output against the contract (enabled in development and tests). */
   validateOutput: boolean;
   logError: (message: string, error: unknown) => void;
+  /** Runs before validation; returns an error to refuse the request (sign-in and role checks). */
+  authorize?: (channel: IpcChannel) => IpcError | null;
 }
 
 /**
@@ -54,6 +57,9 @@ export class IpcRouter {
     if (!handler) {
       return { ok: false, error: { code: 'UNKNOWN_CHANNEL', message: 'This action is not available' } };
     }
+
+    const refusal = this.options.authorize?.(channel) ?? null;
+    if (refusal) return { ok: false, error: refusal };
 
     const spec = ipcContract[channel];
     const parsed = spec.input.safeParse(rawInput);

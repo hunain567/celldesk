@@ -11,6 +11,9 @@ import { AuditLog } from '../src/main/services/audit';
 import { SettingsStore } from '../src/main/services/settings';
 import { PathGrants, registerBackupHandlers } from '../src/main/ipc/backup-handlers';
 import { registerLicenseHandlers } from '../src/main/ipc/license-handlers';
+import { registerAuthHandlers } from '../src/main/ipc/auth-handlers';
+import { SessionManager } from '../src/main/services/session';
+import { UserService } from '../src/main/services/users';
 import type { LicenseService } from '../src/main/licensing/service';
 import { createShop } from './backup-env';
 import { tempDir, TEST_KEY } from './helpers';
@@ -70,6 +73,12 @@ describe('IPC router', () => {
         chooseRequestSavePath: async () => null,
         chooseLicenseFile: async () => null,
         onLicenseChanged: () => undefined,
+      });
+      registerAuthHandlers(router, {
+        users: new UserService(db, new AuditLog(db)),
+        session: new SessionManager(() => 60000),
+        settings: new SettingsStore(db),
+        onSessionEnded: () => undefined,
       });
       expect(router.missingHandlers()).toEqual([]);
     } finally {

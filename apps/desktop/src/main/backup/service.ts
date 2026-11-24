@@ -62,6 +62,8 @@ export interface BackupConfig {
 }
 
 export interface BackupServiceOptions {
+  /** Username recorded in the audit log for actions taken by a person. */
+  actor?: () => string;
   db: SqliteDatabase;
   databaseKeyHex: string;
   installId: string;
@@ -170,7 +172,7 @@ export class BackupService {
       this.insertDestination(input.destinationPath, now);
     });
     save();
-    this.options.audit.append({ actor: 'owner', action: 'backup.setup', details: { destination: input.destinationPath } });
+    this.options.audit.append({ actor: this.options.actor?.() ?? 'owner', action: 'backup.setup', details: { destination: input.destinationPath } });
   }
 
   verifyRecoveryPassword(password: string): boolean {
@@ -194,7 +196,7 @@ export class BackupService {
     const count = (this.db.prepare('SELECT count(*) AS n FROM backup_destinations').get() as { n: number }).n;
     if (count >= 3) throw new AppError('CONFLICT', 'Up to 3 backup locations can be used.');
     this.insertDestination(path, this.now().toISOString());
-    this.options.audit.append({ actor: 'owner', action: 'backup.destination.add', details: { path } });
+    this.options.audit.append({ actor: this.options.actor?.() ?? 'owner', action: 'backup.destination.add', details: { path } });
   }
 
   removeDestination(id: number): void {
@@ -204,7 +206,7 @@ export class BackupService {
     const count = (this.db.prepare('SELECT count(*) AS n FROM backup_destinations').get() as { n: number }).n;
     if (count <= 1) throw new AppError('CONFLICT', 'At least one backup location is required. Add another one first.');
     this.db.prepare('DELETE FROM backup_destinations WHERE id = ?').run(id);
-    this.options.audit.append({ actor: 'owner', action: 'backup.destination.remove', details: { path: row.path } });
+    this.options.audit.append({ actor: this.options.actor?.() ?? 'owner', action: 'backup.destination.remove', details: { path: row.path } });
   }
 
   setSchedule(schedule: BackupSchedule): void {
@@ -212,7 +214,7 @@ export class BackupService {
     this.db
       .prepare('UPDATE backup_config SET schedule_json = ?, updated_at = ? WHERE id = 1')
       .run(JSON.stringify(schedule), this.now().toISOString());
-    this.options.audit.append({ actor: 'owner', action: 'backup.schedule.update', details: schedule });
+    this.options.audit.append({ actor: this.options.actor?.() ?? 'owner', action: 'backup.schedule.update', details: schedule });
   }
 
   history(limit: number): BackupHistoryEntry[] {
@@ -494,7 +496,7 @@ export class BackupService {
     if (status !== 'failed') await this.applyRetention(config);
 
     this.options.audit.append({
-      actor: kind === 'manual' ? 'owner' : 'system',
+      actor: kind === 'manual' ? (this.options.actor?.() ?? 'owner') : 'system',
       action: `backup.${status}`,
       entityType: 'backup_run',
       entityId: String(runId),

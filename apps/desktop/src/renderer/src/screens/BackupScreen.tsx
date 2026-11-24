@@ -4,6 +4,7 @@ import { BackupIcon, FolderIcon, TrashIcon } from '../components/icons';
 import { useToast } from '../components/toast';
 import { Badge, Banner, Button, Field, Panel, Segmented } from '../components/ui';
 import { call, errorMessage } from '../lib/api';
+import { useAuth } from '../lib/auth';
 import { backupKindLabel, formatBytes, formatDateTime, formatRelative, formatUpcoming } from '../lib/format';
 
 const MIN_PASSWORD = 8;
@@ -27,7 +28,7 @@ function resultToast(result: BackupRunResult) {
 }
 
 /** First-time setup: where to save backups and the recovery password. */
-function SetupPanel({ onDone }: { onDone: () => void }) {
+export function BackupSetupPanel({ onDone }: { onDone: () => void }) {
   const notify = useToast();
   const [folder, setFolder] = useState<string | null>(null);
   const [password, setPassword] = useState('');
@@ -259,6 +260,7 @@ function SchedulePanel({ saved, onSaved }: { saved: BackupSchedule; onSaved: () 
 
 function LocationsPanel({ status, onChanged }: { status: BackupStatus; onChanged: () => void }) {
   const notify = useToast();
+  const canManage = useAuth().can('backup.manage');
   const [busy, setBusy] = useState(false);
 
   async function add() {
@@ -291,9 +293,11 @@ function LocationsPanel({ status, onChanged }: { status: BackupStatus; onChanged
       title="Backup locations"
       description="Every backup is saved and verified separately in each location. Use two locations for extra safety."
       actions={
-        <Button icon={<FolderIcon />} busy={busy} disabled={status.destinations.length >= 3} onClick={() => void add()}>
-          Add location
-        </Button>
+        canManage ? (
+          <Button icon={<FolderIcon />} busy={busy} disabled={status.destinations.length >= 3} onClick={() => void add()}>
+            Add location
+          </Button>
+        ) : undefined
       }
     >
       <div className="cd-table-wrap">
@@ -320,6 +324,7 @@ function LocationsPanel({ status, onChanged }: { status: BackupStatus; onChanged
                 <td className="num">{destination.freeBytes !== null ? formatBytes(destination.freeBytes) : '—'}</td>
                 <td>{destination.lastVerifiedAt ? formatRelative(destination.lastVerifiedAt) : 'Never'}</td>
                 <td style={{ textAlign: 'right' }}>
+                  {canManage ? (
                   <Button
                     variant="ghost"
                     icon={<TrashIcon />}
@@ -329,6 +334,7 @@ function LocationsPanel({ status, onChanged }: { status: BackupStatus; onChanged
                   >
                     Remove
                   </Button>
+                  ) : null}
                 </td>
               </tr>
             ))}
@@ -391,6 +397,7 @@ function HistoryPanel({ history }: { history: BackupHistoryEntry[] }) {
 
 export function BackupScreen() {
   const notify = useToast();
+  const canManage = useAuth().can('backup.manage');
   const [status, setStatus] = useState<BackupStatus | null>(null);
   const [history, setHistory] = useState<BackupHistoryEntry[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -448,8 +455,9 @@ export function BackupScreen() {
       <div className="cd-page">
         <Banner tone="warning" title="Backups are not set up">
           Until backups are set up, a disk failure or a stolen PC means the shop's data is lost.
+          {canManage ? '' : ' Ask the shop owner to set them up.'}
         </Banner>
-        <SetupPanel onDone={() => void load()} />
+        {canManage ? <BackupSetupPanel onDone={() => void load()} /> : null}
       </div>
     );
   }
@@ -529,7 +537,7 @@ export function BackupScreen() {
       </Panel>
 
       <LocationsPanel status={status} onChanged={() => void load()} />
-      <SchedulePanel saved={status.schedule} onSaved={() => void load()} />
+      {canManage ? <SchedulePanel saved={status.schedule} onSaved={() => void load()} /> : null}
       <HistoryPanel history={history} />
     </div>
   );
