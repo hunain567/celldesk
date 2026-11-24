@@ -6,8 +6,8 @@ packages:
 # better-sqlite3-multiple-ciphers is deliberately NOT listed: it ships N-API
 # prebuilt binaries for Windows, macOS and Linux that work in both Node.js and
 # Electron, so its node-gyp step (which needs Visual Studio on Windows) is skipped.
+# Electron 45+ has no install script; the root postinstall downloads its binary.
 onlyBuiltDependencies:
-  - electron
   - esbuild
 
 ignoredBuiltDependencies:

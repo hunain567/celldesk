@@ -8,6 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "postinstall": "node node_modules/electron/install.js",
     "dev": "pnpm --filter @celldesk/desktop dev",
     "build": "pnpm --filter @celldesk/desktop build",
     "dist:win": "pnpm --filter @celldesk/desktop dist:win",

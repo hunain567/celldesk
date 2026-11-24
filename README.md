@@ -17,7 +17,7 @@ No Visual Studio or C++ build tools are needed: the SQLite engine ships prebuilt
 
 | Command | What it does |
 | --- | --- |
-| `pnpm install` | Install dependencies |
+| `pnpm install` | Install dependencies and download the Electron runtime |
 | `pnpm dev` | Run the app with hot reload |
 | `pnpm test` | Run all automated tests |
 | `pnpm typecheck` | TypeScript checks for every package |
