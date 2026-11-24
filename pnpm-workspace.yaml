@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Only these packages may run install scripts.
+# better-sqlite3-multiple-ciphers is deliberately NOT listed: it ships N-API
+# prebuilt binaries for Windows, macOS and Linux that work in both Node.js and
+# Electron, so its node-gyp step (which needs Visual Studio on Windows) is skipped.
+onlyBuiltDependencies:
+  - electron
+  - esbuild
+
+ignoredBuiltDependencies:
+  - better-sqlite3-multiple-ciphers
+  - electron-winstaller
