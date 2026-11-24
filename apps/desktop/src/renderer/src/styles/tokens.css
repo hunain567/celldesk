@@ -1,5 +1,5 @@
 /*
- * CellDesk design tokens.
+ * NexoDesk design tokens.
  * Every component reads these variables only; no raw colours elsewhere.
  * Spacing follows a 4 px grid. Light is the default; dark is set by
  * data-theme="dark" on <html>.

@@ -22,7 +22,7 @@ export function App() {
             <DeviceIcon />
           </span>
           <div>
-            <div className="cd-brand__name">CellDesk</div>
+            <div className="cd-brand__name">NexoDesk</div>
             <div className="cd-brand__by">by NexoERP</div>
           </div>
         </div>

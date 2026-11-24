@@ -10,8 +10,8 @@ export interface Migration {
 export class SchemaTooNewError extends Error {
   constructor(readonly databaseVersion: number, readonly appVersion: number) {
     super(
-      `This database was created by a newer version of CellDesk (schema ${databaseVersion}). ` +
-        `This copy of CellDesk supports schema ${appVersion}. Please update CellDesk.`,
+      `This database was created by a newer version of NexoDesk (schema ${databaseVersion}). ` +
+        `This copy of NexoDesk supports schema ${appVersion}. Please update NexoDesk.`,
     );
     this.name = 'SchemaTooNewError';
   }

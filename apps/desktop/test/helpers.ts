@@ -17,7 +17,7 @@ export function fakeProtector(machineByte = 0x5a): SecretProtector {
 }
 
 export function tempDir(): { path: string; cleanup: () => void } {
-  const path = mkdtempSync(join(tmpdir(), 'celldesk-test-'));
+  const path = mkdtempSync(join(tmpdir(), 'nexodesk-test-'));
   return { path, cleanup: () => rmSync(path, { recursive: true, force: true }) };
 }
 

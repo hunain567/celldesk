@@ -1,4 +1,4 @@
-# CellDesk by NexoERP
+# NexoDesk by NexoERP
 
 Offline shop management and POS for mobile phone and electronics retailers, packaged as a Windows desktop app.
 
@@ -27,10 +27,10 @@ No Visual Studio or C++ build tools are needed: the SQLite engine ships prebuilt
 During development the data folder can be redirected so real shop data is never touched:
 
 ```powershell
-$env:CELLDESK_DATA_DIR = "D:\celldesk-dev-data"; pnpm dev
+$env:NEXODESK_DATA_DIR = "D:\nexodesk-dev-data"; pnpm dev
 ```
 
-Packaged builds always use `%APPDATA%\CellDesk`.
+Packaged builds always use `%APPDATA%\NexoDesk`.
 
 ## Repository layout
 
@@ -46,9 +46,9 @@ docs/                Architecture and decisions
 
 ## Data on the shop PC
 
-| Path under `%APPDATA%\CellDesk` | Contents |
+| Path under `%APPDATA%\NexoDesk` | Contents |
 | --- | --- |
-| `data\celldesk.db` | Business database, encrypted (SQLCipher v4) |
+| `data\nexodesk.db` | Business database, encrypted (SQLCipher v4) |
 | `keys\database.key` | Database key, protected by Windows DPAPI |
 | `safety\` | Verified copies taken before database upgrades |
 | `logs\` | Daily log files, kept 30 days |

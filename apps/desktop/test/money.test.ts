@@ -1,4 +1,4 @@
-import { formatRupees, parseRupees } from '@celldesk/shared';
+import { formatRupees, parseRupees } from '@nexodesk/shared';
 import { describe, expect, it } from 'vitest';
 
 describe('money helpers', () => {

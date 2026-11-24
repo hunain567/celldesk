@@ -1,4 +1,4 @@
-import { IPC_CHANNEL_NAMES, ipcContract } from '@celldesk/shared';
+import { IPC_CHANNEL_NAMES, ipcContract } from '@nexodesk/shared';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type SqliteDatabase } from '../src/main/db/connection';
@@ -40,7 +40,7 @@ describe('IPC router', () => {
       installId: '00000000-0000-4000-8000-000000000000',
       latestSchemaVersion: migrations.length,
       startedAt: new Date('2026-11-24T05:00:00Z'),
-      app: { name: 'CellDesk', version: '0.1.0', electronVersion: 'test', platform: 'test' },
+      app: { name: 'NexoDesk', version: '0.1.0', electronVersion: 'test', platform: 'test' },
     });
   });
   afterEach(() => {

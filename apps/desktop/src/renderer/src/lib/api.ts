@@ -1,8 +1,8 @@
-import type { CellDeskBridge, IpcChannel, IpcError, IpcInput, IpcOutput } from '@celldesk/shared';
+import type { NexoDeskBridge, IpcChannel, IpcError, IpcInput, IpcOutput } from '@nexodesk/shared';
 
 declare global {
   interface Window {
-    celldesk: CellDeskBridge;
+    nexodesk: NexoDeskBridge;
   }
 }
 
@@ -19,7 +19,7 @@ export class ApiError extends Error {
  * message that is safe to show to the user.
  */
 export async function call<C extends IpcChannel>(channel: C, input?: IpcInput<C>): Promise<IpcOutput<C>> {
-  const result = await window.celldesk.invoke(channel, input);
+  const result = await window.nexodesk.invoke(channel, input);
   if (!result.ok) throw new ApiError(result.error);
   return result.data;
 }

@@ -1,4 +1,4 @@
-import type { IpcErrorCode } from '@celldesk/shared';
+import type { IpcErrorCode } from '@nexodesk/shared';
 
 /**
  * An error whose message is safe to show to the user. Any other error reaching

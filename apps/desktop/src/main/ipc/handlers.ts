@@ -1,4 +1,4 @@
-import type { SystemInfo } from '@celldesk/shared';
+import type { SystemInfo } from '@nexodesk/shared';
 import { statSync } from 'node:fs';
 import { checkIntegrity, type SqliteDatabase } from '../db/connection';
 import { getSchemaVersion } from '../db/migrator';

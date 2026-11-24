@@ -22,7 +22,7 @@ const PRODUCTION_CSP = [
 
 function contentSecurityPolicy(): Plugin {
   return {
-    name: 'celldesk-csp',
+    name: 'nexodesk-csp',
     apply: 'build',
     transformIndexHtml: (html) =>
       html.replace('<head>', `<head>\n    <meta http-equiv="Content-Security-Policy" content="${PRODUCTION_CSP}" />`),
@@ -32,7 +32,7 @@ function contentSecurityPolicy(): Plugin {
 export default defineConfig({
   main: {
     build: {
-      externalizeDeps: { exclude: ['@celldesk/shared', 'zod'] },
+      externalizeDeps: { exclude: ['@nexodesk/shared', 'zod'] },
       rollupOptions: { input: { index: resolve(__dirname, 'src/main/index.ts') } },
     },
   },

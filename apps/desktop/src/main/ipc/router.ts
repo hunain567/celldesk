@@ -5,7 +5,7 @@ import {
   type IpcContract,
   type IpcOutput,
   type IpcResult,
-} from '@celldesk/shared';
+} from '@nexodesk/shared';
 import type { z } from 'zod';
 import { AppError } from '../errors';
 

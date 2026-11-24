@@ -1,4 +1,4 @@
-import { IPC_CHANNEL_NAMES, IPC_INVOKE_CHANNEL } from '@celldesk/shared/channels';
+import { IPC_CHANNEL_NAMES, IPC_INVOKE_CHANNEL } from '@nexodesk/shared/channels';
 import { contextBridge, ipcRenderer } from 'electron';
 
 const allowed = new Set<string>(IPC_CHANNEL_NAMES);
@@ -16,4 +16,4 @@ const bridge = Object.freeze({
   },
 });
 
-contextBridge.exposeInMainWorld('celldesk', bridge);
+contextBridge.exposeInMainWorld('nexodesk', bridge);

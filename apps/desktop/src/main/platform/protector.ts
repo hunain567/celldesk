@@ -18,7 +18,7 @@ export function createSecretProtector(options: { allowUnprotected: boolean }): S
     };
   }
   if (!options.allowUnprotected) {
-    throw new Error('Windows data protection is not available, so CellDesk cannot store its keys securely.');
+    throw new Error('Windows data protection is not available, so NexoDesk cannot store its keys securely.');
   }
   return {
     isOsBacked: false,

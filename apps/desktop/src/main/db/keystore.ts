@@ -35,6 +35,7 @@ export class KeyFileUnreadableError extends Error {
   }
 }
 
+// File format identifier only (not branding); changing it would make existing key files unreadable.
 const KEY_FILE_MAGIC = 'CDKEY1';
 const KEY_BYTES = 32;
 

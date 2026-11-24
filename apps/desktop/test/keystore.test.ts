@@ -12,7 +12,7 @@ describe('database keystore', () => {
   beforeEach(() => {
     dir = tempDir();
     keyPath = join(dir.path, 'keys', 'database.key');
-    databasePath = join(dir.path, 'data', 'celldesk.db');
+    databasePath = join(dir.path, 'data', 'nexodesk.db');
   });
   afterEach(() => dir.cleanup());
 

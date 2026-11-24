@@ -12,4 +12,4 @@ export const IPC_CHANNEL_NAMES = [
 ] as const;
 
 /** The single Electron IPC channel used for all request/response calls. */
-export const IPC_INVOKE_CHANNEL = 'celldesk:invoke';
+export const IPC_INVOKE_CHANNEL = 'nexodesk:invoke';

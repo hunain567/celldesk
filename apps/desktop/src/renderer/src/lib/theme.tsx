@@ -1,4 +1,4 @@
-import type { Theme } from '@celldesk/shared';
+import type { Theme } from '@nexodesk/shared';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { call } from './api';
 

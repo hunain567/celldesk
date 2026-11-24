@@ -95,7 +95,7 @@ export interface IpcError {
 
 export type IpcResult<T> = { ok: true; data: T } | { ok: false; error: IpcError };
 
-/** The single function the preload bridge exposes on `window.celldesk`. */
-export interface CellDeskBridge {
+/** The single function the preload bridge exposes on `window.nexodesk`. */
+export interface NexoDeskBridge {
   invoke<C extends IpcChannel>(channel: C, input?: IpcInput<C>): Promise<IpcResult<IpcOutput<C>>>;
 }

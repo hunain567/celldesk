@@ -1,4 +1,4 @@
-import { IPC_INVOKE_CHANNEL } from '@celldesk/shared/channels';
+import { IPC_INVOKE_CHANNEL } from '@nexodesk/shared/channels';
 import { app, dialog, ipcMain } from 'electron';
 import { bootstrapDatabase, resolveDataLocations, type BootstrapResult } from './db/bootstrap';
 import { KeyFileMissingError, KeyFileUnreadableError } from './db/keystore';
@@ -11,8 +11,8 @@ import { AuditLog } from './services/audit';
 import { SettingsStore } from './services/settings';
 import { createMainWindow, hardenSession, isTrustedUrl, type WindowOptions } from './window';
 
-app.setName('CellDesk');
-app.setAppUserModelId('com.nexoerp.celldesk');
+app.setName('NexoDesk');
+app.setAppUserModelId('com.nexoerp.nexodesk');
 app.enableSandbox();
 
 // Two copies writing the same database would be unsafe, so only one may run.
@@ -30,7 +30,7 @@ let database: BootstrapResult | null = null;
 
 function dataRoot(): string {
   // A separate folder can be used during development; packaged builds always use AppData.
-  const override = process.env['CELLDESK_DATA_DIR'];
+  const override = process.env['NEXODESK_DATA_DIR'];
   return !app.isPackaged && override ? override : app.getPath('userData');
 }
 
@@ -43,13 +43,13 @@ function startupErrorMessage(error: unknown): string {
   ) {
     return error.message;
   }
-  return 'CellDesk could not open its database. Your data has not been changed. Please contact support.';
+  return 'NexoDesk could not open its database. Your data has not been changed. Please contact support.';
 }
 
 function start(): void {
   const locations = resolveDataLocations(dataRoot());
   logger.init(locations.logDirectory);
-  logger.info('CellDesk starting', { version: app.getVersion(), packaged: app.isPackaged });
+  logger.info('NexoDesk starting', { version: app.getVersion(), packaged: app.isPackaged });
 
   try {
     const protector = createSecretProtector({ allowUnprotected: !app.isPackaged });
@@ -57,7 +57,7 @@ function start(): void {
     database = bootstrapDatabase({ locations, protector, appVersion: app.getVersion() });
   } catch (error) {
     logger.error('Database start-up failed', error);
-    dialog.showErrorBox('CellDesk cannot start', `${startupErrorMessage(error)}\n\nData folder: ${locations.root}`);
+    dialog.showErrorBox('NexoDesk cannot start', `${startupErrorMessage(error)}\n\nData folder: ${locations.root}`);
     app.exit(1);
     return;
   }
@@ -94,7 +94,7 @@ function start(): void {
     latestSchemaVersion,
     startedAt,
     app: {
-      name: 'CellDesk',
+      name: 'NexoDesk',
       version: app.getVersion(),
       electronVersion: process.versions.electron ?? 'unknown',
       platform: `${process.platform === 'win32' ? 'Windows' : process.platform} ${process.arch}`,

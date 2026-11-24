@@ -1,5 +1,5 @@
-appId: com.nexoerp.celldesk
-productName: CellDesk
+appId: com.nexoerp.nexodesk
+productName: NexoDesk
 copyright: Copyright © 2026 NexoERP
 directories:
   output: release/${version}
@@ -28,8 +28,8 @@ win:
     - target: nsis
       arch: [x64]
   icon: build/icon.ico
-  executableName: CellDesk
-  artifactName: CellDesk-Setup-${version}.${ext}
+  executableName: NexoDesk
+  artifactName: NexoDesk-Setup-${version}.${ext}
 
 nsis:
   oneClick: false
@@ -38,9 +38,9 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: CellDesk
+  shortcutName: NexoDesk
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
-  uninstallDisplayName: CellDesk by NexoERP
+  uninstallDisplayName: NexoDesk by NexoERP
   # Business data and backups are never removed by the uninstaller.
   deleteAppDataOnUninstall: false

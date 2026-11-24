@@ -1,21 +1,21 @@
-# CellDesk architecture
+# NexoDesk architecture
 
 The full audit and architecture plan is kept in the project document
-"CellDesk — Project Audit & Architecture Plan" (https://claude.ai/artifact/WsCTst5BtCKhoM296BViN4).
+"NexoDesk — Project Audit & Architecture Plan" (https://claude.ai/artifact/WsCTst5BtCKhoM296BViN4).
 This file records what is implemented and the decisions code depends on.
 
 ## Decisions (24 Nov 2026)
 
 - Windows desktop only, fully offline. No ERPNext, no cloud sync in Phase 1.
-- Product name: CellDesk by NexoERP.
-- Licensing: no online server. A private CellDesk License Manager on the owner's laptop signs device-bound
-  licence files (`.cdlic`, Ed25519). Shops receive renewals by USB or WhatsApp.
+- Product name: NexoDesk by NexoERP.
+- Licensing: no online server. A private NexoDesk License Manager on the owner's laptop signs device-bound
+  licence files (`.ndlic`, Ed25519). Shops receive renewals by USB or WhatsApp.
 - Money is stored as integer paisa. Posted documents are never edited, only reversed.
 
 ## Process model
 
 - **Main process** is the backend: database, business rules, backups, licence checks.
-- **Preload** exposes one function, `window.celldesk.invoke(channel, input)`, for channels in
+- **Preload** exposes one function, `window.nexodesk.invoke(channel, input)`, for channels in
   `packages/shared/src/channels.ts` only.
 - **Renderer** is sandboxed, has no Node.js access, and runs under a strict Content Security Policy in
   production builds.

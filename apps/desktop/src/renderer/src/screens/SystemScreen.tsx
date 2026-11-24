@@ -1,4 +1,4 @@
-import type { AuditVerifyResult, IntegrityResult, SystemInfo, Theme } from '@celldesk/shared';
+import type { AuditVerifyResult, IntegrityResult, SystemInfo, Theme } from '@nexodesk/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { ListCheckIcon, ShieldCheckIcon } from '../components/icons';
 import { useToast } from '../components/toast';

@@ -31,9 +31,11 @@ export function createMainWindow(options: WindowOptions): BrowserWindow {
     minWidth: 1100,
     minHeight: 700,
     show: false,
-    title: 'CellDesk',
+    title: 'NexoDesk',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0f1218' : '#f6f7f9',
     autoHideMenuBar: true,
+    // Packaged builds take the icon from the signed .exe; development runs need it set here.
+    ...(options.isPackaged ? {} : { icon: join(__dirname, '../../build/icon.png') }),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,

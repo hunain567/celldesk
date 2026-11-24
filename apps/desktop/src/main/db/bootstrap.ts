@@ -7,7 +7,7 @@ import { migrations } from './migrations';
 import { latestVersion, migrate, type MigrateResult } from './migrator';
 
 export interface DataLocations {
-  /** Root folder for everything CellDesk stores on this PC. */
+  /** Root folder for everything NexoDesk stores on this PC. */
   root: string;
   databasePath: string;
   keyPath: string;
@@ -18,7 +18,7 @@ export interface DataLocations {
 export function resolveDataLocations(root: string): DataLocations {
   return {
     root,
-    databasePath: join(root, 'data', 'celldesk.db'),
+    databasePath: join(root, 'data', 'nexodesk.db'),
     keyPath: join(root, 'keys', 'database.key'),
     safetyDirectory: join(root, 'safety'),
     logDirectory: join(root, 'logs'),

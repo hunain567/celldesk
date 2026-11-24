@@ -1,4 +1,4 @@
-import { settingSchemas, type SettingKey, type SettingValue } from '@celldesk/shared';
+import { settingSchemas, type SettingKey, type SettingValue } from '@nexodesk/shared';
 import type { SqliteDatabase } from '../db/connection';
 
 export const settingDefaults: { [K in SettingKey]: SettingValue<K> } = {

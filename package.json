@@ -1,7 +1,7 @@
 {
-  "name": "celldesk-workspace",
+  "name": "nexodesk-workspace",
   "private": true,
-  "description": "CellDesk by NexoERP - shop management and POS for mobile phone retailers",
+  "description": "NexoDesk by NexoERP - shop management and POS for mobile phone retailers",
   "author": "NexoERP",
   "packageManager": "pnpm@10.28.0",
   "engines": {
@@ -9,9 +9,9 @@
   },
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
-    "dev": "pnpm --filter @celldesk/desktop dev",
-    "build": "pnpm --filter @celldesk/desktop build",
-    "dist:win": "pnpm --filter @celldesk/desktop dist:win",
+    "dev": "pnpm --filter @nexodesk/desktop dev",
+    "build": "pnpm --filter @nexodesk/desktop build",
+    "dist:win": "pnpm --filter @nexodesk/desktop dist:win",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test"
   }
